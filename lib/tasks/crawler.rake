@@ -1,0 +1,109 @@
+namespace :crawler do
+  desc "crawls the blooklook website and write book information to database"
+  task crawl: :environment do
+    Crawler.new.crawl!
+  end
+
+  class Crawler
+    require 'mechanize'
+    attr_reader :queue
+
+    def initialize
+      # Constants
+      @root_url = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
+      @current_term = "1149" # calculate this?
+      @verbose = true
+
+      # Prepare page
+      @agent = Mechanize.new
+      @root_page = @agent.get(@root_url)
+      target_form = @root_page.at('div#search_box_course form') # Nokogiri object
+      target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
+      target_form.field_with(value: /[0-9]{4}/).option_with(value: @current_term).click # Select the term
+      @root_page = @agent.submit(target_form) # first page of results
+
+      @queue = Array.new # array of hashes used to build records
+    end
+
+    def scrape_page!(page)
+      # All the book information are in separate book_info divs
+      book_nodes = page.search("div.book_info")
+      book_nodes.each do |book_node|
+        book_record = Hash.new
+        # get book data (format is: <p><span class="author">Orson Scott-Card</span></p>)
+        book_node.search("p span").each do |book_info|
+          key = "unknown_key" unless key = book_info.attr("class")
+          val = "unknown_val" unless val = book_info.inner_text.delete("\n").gsub(/\s+/," ")
+          book_record[key.to_sym] = val
+        end
+
+        # get ISBN number (found in an external link to a library resource. ISBN is 13 digits)
+        # useful to provide in API, as well as maybe listing the cheapest prices using isbnsearch.org
+        # NOTE: ISBN appears to always be the same as booklook's SKU (stock keeping unit) which is provided above
+        link_node =  book_node.search("p a").select { |node| node['href'] =~ /=[0-9]{13}/ }
+        isbn = link_node.map { |link| link['href'] =~ /([0-9]{13})/; $1 }
+        book_record[:isbn] = isbn
+
+        # get course info(teacher, section, etc) associated with this book (all hidden fields)
+        book_node.search("input[type=hidden]").each do |hidden|
+          key = "unknown_key" unless key = hidden.attr("name")
+          val = "unknown_val" unless val = hidden.attr("value").delete("\n").gsub(/\s+/," ")
+          book_record[key.to_sym] = val
+        end
+        @queue << book_record
+      end
+    end
+
+    def start_scrape!(link)
+      attempt = 1
+      while attempt <= 5 do
+        begin
+          page = @agent.get(link.href)
+          scrape_page! page
+          break
+        rescue Net::HTTPInternalError
+          puts "HTTPInternalError: will try again in 10 seconds (attempt #{attempt})"
+          attempt += 1
+          sleep 10
+        end
+      end
+    end
+
+    def crawl!
+      # Retrieve all links to paginated results. As at Dec 10/2014 there are 301 pages for term 1149
+      links = @root_page.links_with(href: /book\/scan/).uniq { |link| link.href }
+
+      threads = []
+      threads << Thread.new { scrape_page! @root_page } # first page has already been retrieved so can call scrape_page! directly
+
+      # scrape 5 links at a time to not #pwn the server. Maybe set a variable @slice_size later
+      # for now, scrape only 10 links (2 slices of 5)
+      links[0,10].each_slice(5).to_a.each do |links_slice|
+        links_slice.each do |link|
+          threads << Thread.new { start_scrape! link }
+        end
+        print_verbose "Scraping 5 links asynchronously"
+        threads.each { |thr| thr.join }
+        print_verbose "Done scraping that set"
+      end
+      # save all this data
+      write_DB!
+    end # end crawl! function
+
+    # ALL PRIVATE FUNCTIONS FOLLOW
+    private
+    def print_verbose(string)
+      print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if @verbose
+    end
+
+    def write_DB!
+      print_verbose "Writing to database"
+      ActiveRecord::Base.transaction do
+        @queue.each do |row|
+          # Book.create(row) or Book.update_attributes(row) if it exists
+          pp row
+        end
+      end
+    end # end write_DB function
+  end # end class
+end # end namespace
