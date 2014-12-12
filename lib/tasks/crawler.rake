@@ -6,17 +6,17 @@ namespace :crawler do
 
   class Crawler
     require 'mechanize'
+    require 'net/http'
     attr_reader :queue
+    ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
 
     def initialize
-      # Constants
-      @root_url = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
       @current_term = "1149" # calculate this?
       @verbose = true
 
       # Prepare page
       @agent = Mechanize.new
-      @root_page = @agent.get(@root_url)
+      @root_page = @agent.get(ROOT_URL)
       target_form = @root_page.at('div#search_box_course form') # Nokogiri object
       target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
       target_form.field_with(value: /[0-9]{4}/).option_with(value: @current_term).click # Select the term
@@ -41,7 +41,7 @@ namespace :crawler do
         # useful to provide in API, as well as maybe listing the cheapest prices using isbnsearch.org
         # NOTE: ISBN appears to always be the same as booklook's SKU (stock keeping unit) which is provided above
         link_node =  book_node.search("p a").select { |node| node['href'] =~ /=[0-9]{13}/ }
-        isbn = link_node.map { |link| link['href'] =~ /([0-9]{13})/; $1 }
+        isbn = link_node.map { |link| link['href'] =~ /([0-9]{13})/; $1 }.first
         book_record[:isbn] = isbn
 
         # get course info(teacher, section, etc) associated with this book (all hidden fields)
@@ -56,17 +56,19 @@ namespace :crawler do
 
     def start_scrape!(link)
       attempt = 1
-      while attempt <= 5 do
+      attempt_max = 5
+      while attempt <= attempt_max do
         begin
           page = @agent.get(link.href)
           scrape_page! page
           break
-        rescue Net::HTTPInternalError
-          puts "HTTPInternalError: will try again in 10 seconds (attempt #{attempt})"
+        rescue Net::HTTPInternalServerError
+          puts "HTTPInternalServerError: will try again in 10 seconds (attempt #{attempt})"
           attempt += 1
           sleep 10
         end
       end
+      raise "Over #{attempt_max} attempts made for #{link.href}, exiting" if attempt > attempt_max
     end
 
     def crawl!
