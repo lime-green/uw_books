@@ -12,7 +12,9 @@ namespace :crawler do
 
     def initialize
       @current_term = "1149" # calculate this?
-      @verbose = true
+      @verbose = true        # useful messages
+      @slice_max = 5         # crawl this amount of links asynchronously
+      @retry_delay = 10      # sleep for this amount of seconds after a failed request
 
       # Prepare page
       @agent = Mechanize.new
@@ -54,7 +56,7 @@ namespace :crawler do
       end
     end
 
-    def start_scrape!(link)
+    def start_scrape!(link, thread_name)
       attempt = 1
       attempt_max = 5
       while attempt <= attempt_max do
@@ -62,10 +64,14 @@ namespace :crawler do
           page = @agent.get(link.href)
           scrape_page! page
           break
-        rescue Net::HTTPInternalServerError
-          puts "HTTPInternalServerError: will try again in 10 seconds (attempt #{attempt})"
-          attempt += 1
-          sleep 10
+        rescue Mechanize::ResponseCodeError => exception
+          if exception.response_code == '500'
+            print_verbose "HTTPInternalServerError in #{thread_name}: will try again in #{@retry_delay} seconds (attempt #{attempt})"
+            attempt += 1
+            sleep @retry_delay
+          else
+            raise
+          end
         end
       end
       raise "Over #{attempt_max} attempts made for #{link.href}, exiting" if attempt > attempt_max
@@ -76,15 +82,15 @@ namespace :crawler do
       links = @root_page.links_with(href: /book\/scan/).uniq { |link| link.href }
 
       threads = []
-      threads << Thread.new { scrape_page! @root_page } # first page has already been retrieved so can call scrape_page! directly
+      num_threads = 0
+      threads << Thread.new { scrape_page! @root_page; num_threads += 1 } # first page has already been retrieved so can call scrape_page! directly
 
-      # scrape 5 links at a time to not #pwn the server. Maybe set a variable @slice_size later
       # for now, scrape only 10 links (2 slices of 5)
-      links[0,10].each_slice(5).to_a.each do |links_slice|
-        links_slice.each do |link|
-          threads << Thread.new { start_scrape! link }
+      links.take(10).each_slice(@slice_max) do |slice|
+        slice.each do |link|
+          threads << Thread.new { num_threads += 1; start_scrape! link, "Thread ##{num_threads}" }
         end
-        print_verbose "Scraping 5 links asynchronously"
+        print_verbose "Scraping #{slice.size} links asynchronously"
         threads.each { |thr| thr.join }
         print_verbose "Done scraping that set"
       end
