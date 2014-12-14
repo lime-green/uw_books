@@ -1,3 +1,4 @@
+require_relative 'scraper'
 class Crawler
   require 'mechanize'
   require 'net/http'
@@ -21,42 +22,13 @@ class Crawler
     @queue = Array.new # array of hashes used to build records
   end
 
-  def scrape_page!(page)
-    # All the book information are in separate book_info divs
-    book_nodes = page.search("div.book_info")
-    book_nodes.each do |book_node|
-      book_record = Hash.new
-      # get book data (format is: <p><span class="author">Orson Scott-Card</span></p>)
-      book_node.search("p span").each do |book_info|
-        key = "unknown_key" unless key = book_info.attr("class")
-        val = "unknown_val" unless val = book_info.inner_text.delete("\n").gsub(/\s+/," ")
-        book_record[key.to_sym] = val
-      end
-
-      # get ISBN number (found in an external link to a library resource. ISBN is 13 digits)
-      # useful to provide in API, as well as maybe listing the cheapest prices using isbnsearch.org
-      # NOTE: ISBN appears to always be the same as booklook's SKU (stock keeping unit) which is provided above
-      link_node =  book_node.search("p a").select { |node| node['href'] =~ /=[0-9]{13}/ }
-      isbn = link_node.map { |link| link['href'] =~ /([0-9]{13})/; $1 }.first
-      book_record[:isbn] = isbn
-
-      # get course info(teacher, section, etc) associated with this book (all hidden fields)
-      book_node.search("input[type=hidden]").each do |hidden|
-        key = "unknown_key" unless key = hidden.attr("name")
-        val = "unknown_val" unless val = hidden.attr("value").delete("\n").gsub(/\s+/," ")
-        book_record[key.to_sym] = val
-      end
-      @queue << book_record
-    end
-  end
-
   def start_scrape!(link, thread_name)
     attempt = 1
     attempt_max = 5
     while attempt <= attempt_max do
       begin
         page = @agent.get(link.href)
-        scrape_page! page
+        result = Scraper.scrape_page page
         break
       rescue Mechanize::ResponseCodeError => exception
         if exception.response_code == '500'
@@ -69,6 +41,7 @@ class Crawler
       end
     end
     raise "Over #{attempt_max} attempts made for #{link.href}, exiting" if attempt > attempt_max
+    return result
   end
 
   def crawl!
@@ -77,19 +50,36 @@ class Crawler
 
     threads = []
     num_threads = 0
-    threads << Thread.new { scrape_page! @root_page; num_threads += 1 } # first page has already been retrieved so can call scrape_page! directly
+
+    books = Queue.new
+
+    threads << Thread.new do
+
+      Scraper.scrape_page(@root_page).each do |book|
+        books << book
+      end
+
+      num_threads += 1
+    end
 
     # for now, scrape only 10 links (2 slices of 5)
     links.take(10).each_slice(@slice_max) do |slice|
       slice.each do |link|
-        threads << Thread.new { num_threads += 1; start_scrape! link, "Thread ##{num_threads}" }
+        threads << Thread.new do
+          num_threads += 1;
+
+          start_scrape!(link, "Thread ##{num_threads}").each do |book|
+            books << book
+          end
+
+        end
       end
       print_verbose "Scraping #{slice.size} links asynchronously"
       threads.each { |thr| thr.join }
       print_verbose "Done scraping that set"
     end
     # save all this data
-    write_DB!
+    write_DB!(books)
   end # end crawl! function
 
   # ALL PRIVATE FUNCTIONS FOLLOW
@@ -98,12 +88,12 @@ class Crawler
     print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if @verbose
   end
 
-  def write_DB!
+  def write_DB!(records)
     print_verbose "Writing to database"
     ActiveRecord::Base.transaction do
-      @queue.each do |row|
+      while records.length > 0 do
         # Book.create(row) or Book.update_attributes(row) if it exists
-        pp row
+        pp records.pop
       end
     end
   end # end write_DB function

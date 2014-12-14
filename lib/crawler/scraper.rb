@@ -3,18 +3,18 @@ module Scraper
     book_nodes = document.search("div.book_info")
     book_nodes.map do |book_node|
       {
-        author: book_node.css(".author"),
-        title: book_node.css(".title"),
-        sku: book_node.css(".sku"),
-        price: book_node.css(".price"),
-        stock: book_node.css(".stock"),
-        term: book_node.xpath("//input[@name='mv_order_orderline_term']"),
-        department: book_node.xpath("//input[@name='mv_order_orderline_department']"),
-        course: book_node.xpath("//input[@name='mv_order_orderline_course']"),
-        section: book_node.xpath("//input[@name='mv_order_orderline_section']"),
-        instructor: book_node.xpath("//input[@name='mv_order_orderline_instructor']"),
-        reqopt: book_node.xpath("//input[@name='mv_order_orderline_reqopt']"),
-        quantity: book_node.xpath("//input[@name='mv_order_quantity']")
+        author: book_node.css(".author").text,
+        title: book_node.css(".title").text,
+        sku: book_node.css(".sku").text,
+        price: book_node.css(".price").text,
+        stock: book_node.css(".stock").text,
+        term: book_node.at_xpath("//input[@name='mv_order_orderline_term']")[:value],
+        department: book_node.at_xpath("//input[@name='mv_order_orderline_department']")[:value],
+        course: book_node.at_xpath("//input[@name='mv_order_orderline_course']")[:value],
+        section: book_node.at_xpath("//input[@name='mv_order_orderline_section']")[:value],
+        instructor: book_node.at_xpath("//input[@name='mv_order_orderline_instructor']")[:value],
+        reqopt: book_node.at_xpath("//input[@name='mv_order_orderline_reqopt']")[:value],
+        quantity: book_node.at_xpath("//input[@name='mv_order_quantity']")[:value]
       }
     end
   end
