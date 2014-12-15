@@ -3,7 +3,7 @@ class CreateBooks < ActiveRecord::Migration
     create_table :books do |t|
       t.string :author, null: false
       t.string :title, null: false
-      t.integer :sku, null: false
+      t.integer :sku, null: false, limit: 8
       t.float :price, null: false
       t.integer :stock, null: false
       t.integer :term, null: false
