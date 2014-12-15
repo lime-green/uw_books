@@ -1,0 +1,1757 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- begin LAYOUT_TOP in regions -->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="robots" content="noindex,nofollow" />
+<title>BookLook -- Course Search results</title>
+<link rel="stylesheet" type="text/css" href="https://info.uwaterloo.ca/retailservices/css/main.css" />
+<link rel="stylesheet" type="text/css" href="https://info.uwaterloo.ca/bookstore/css/bookstore.css" />
+<link type="text/css" rel="stylesheet" href="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/buttons.css" />
+<link type="text/css" rel="stylesheet" href="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/tablesets.css" />
+<link type="text/css" rel="stylesheet" href="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/fieldsets.css" />
+<link type="text/css" rel="stylesheet" href="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/displaysets.css" />
+<style>
+.hidden {display: none;}
+</style>
+<!-- conditional comment added for IE 6 printing, IE 5.5 will not print this page very well -->
+<!-- need to strip so the if gets passed to the browser -->
+<!--[if gte IE 6]>
+<style type="text/css" media="print">
+@import url("https://info.uwaterloo.ca/www/css/UWprint.css");
+</style>
+<![endif]-->
+<!-- this print will work in W3 Standard compliant browsers -->
+
+<script type="text/javascript" src="https://info.uwaterloo.ca/retailservices/scripts/mootools-core-1.4.5.js"></script>
+<script type="text/javascript" src="https://info.uwaterloo.ca/retailservices/scripts/mootools-more.js"></script>
+<script type="text/javascript">// webstore scripts for all stores
+
+
+//GENERAL UTILITY FUNCTIONS
+//grabs all elements with the same class
+document.getElementsByClassName = function(cl) {    
+var retnode = [];
+    var myclass = new RegExp('\\b'+cl+'\\b');
+    var elem = this.getElementsByTagName('*');
+    for (var i = 0; i < elem.length; i++) {
+        var classes = elem[i].className;
+        if (myclass.test(classes)) retnode.push(elem[i]);
+    }
+    return retnode;
+}
+
+
+
+//WEBSTORE UTILITY FUNCTIONS
+//makes a happy little cart flyout to plonk the number of items in, styled in main.css
+function cartToolTip() {
+        var cartTip = new Tips('.cartDisplay',{
+                                fixed: true, 
+                                className: 'cartTip', //class name of the flyout container
+                                offset: Browser.ie ? {'x':-206,'y':30} : {'x':9,'y':16}  
+                                //conditional for the crap IE7 javascript engine which measures everything different.
+                               });
+    
+    }
+
+//search type selector for header search
+function headerSearchSelect(searchTarget) {
+    var sTarget;
+    var sBox  = $('searchbox');
+    var sTag = $('searchTag').get('name'); // the https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html tag has to be there at page load to fill properly, stored in a#searchTag on page
+    if(searchTarget == 'uwsearch') {
+        sTarget = 'http://info.uwaterloo.ca/clfscripts/uwsearch.php?searchtype=google-uwdir-keyword';//main UW keyword search
+        $('headerSearchSelect').set('action',sTarget);
+        sBox.set('name','searchterm');
+        } else if (searchTarget == 'storesearch') {
+        sTarget = sTag;
+        sBox.set('name','mv_searchspec');
+        $('headerSearchSelect').set('action',sTarget);
+        }
+}
+
+//check to see if the searchbox action is set
+function checkHeaderSearch() {
+    var sAction  = $('headerSearchSelect').get('action');
+    var sTag = $('searchTag').get('name'); // the https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html tag has to be there at page load to fill properly, stored in a#searchTag on page
+    if (sAction == null) {
+        $('headerSearchSelect').set('action', sTag); //default the searchbox to the store search
+        } else {
+        //console.log('Action Set');    
+        }
+
+    
+}
+    
+//double checks that you do in fact want to remove something from the cart
+// could also use document.basket instead of obj.form
+function double_check(obj) {
+    var answer = confirm('Are you sure you want to remove this item?')
+        if (answer)
+        {
+        obj.form.action = 'https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/process';
+            obj.form.submit();
+        } else {
+            obj.checked=false;
+        }
+    }
+
+//strips mv_todo for javascript validation
+function yesScript() {
+        if(document.checkout.mv_todo) {
+            document.checkout.mv_todo.value = '';
+            document.checkout.mv_click.type = 'button';
+            document.checkout.mv_click.addEvent('click', function() {
+                                        validateCard(); 
+            });
+        } else {//do nothing
+        }
+    }
+
+//checks to make sure there's a card type selected on the checkout page
+ function validateCard() {
+        var profileVal = document.checkout.mv_order_profile.value;
+        var cardVal = document.checkout.mv_credit_card_type.value;
+        if (cardVal == 'none_selected') {
+                alert ('Please select a payment type before continuing');
+            } else {
+                document.checkout.mv_todo.value = 'submit';
+                document.checkout.submit();
+            }
+    }
+
+//collects all the hidden courseCatch loop elements, sets their value to one and submits the form to add them all to the cart
+function addAllCourse(course) {
+                    thisCourseItems = document.getElementsByClassName(course);
+                    for (var i = 0; i < thisCourseItems.length; i++) {
+                        thisCourseItems[i].value = 1;
+                    }
+                    document.courseSubmit.submit()
+                }
+
+
+//marks the fact the province/state select box has changed before submitting the form for update
+function provinceChange() {
+        //console.log('Province Changed');
+        var goToPostal = Cookie.write('goTo','zip',{duration:0});
+        
+    }
+function zipChange() {
+        //console.log('PCode changed');
+    }
+
+function shipChange () {
+        //console.log('Shipping Changed'); 
+    }
+        
+
+//array of profile types available in the select
+var profileType = [];
+
+
+//gathers payment types for checkout page
+function payTypes() {
+    var getProfiles = document.getElementsByClassName('card_type');
+    Array.each(getProfiles, function(profile) {
+                               var el = $(profile);//necessary for IE to get all the Element methods from mootools
+                               var thisID = el.get('title');
+                               addPayType(thisID);                     
+                               });
+}
+
+//adds a payment type to the available set
+function addPayType(type) {
+    profileType[profileType.length] = type; 
+    }
+
+//finds/hides payment types on checkout page
+function payment_selector()
+{   
+    // find the checkout form
+    var form = document.checkout;
+    if(form == undefined)
+        return;
+    // find the payment type selector
+    var selec = form.mv_credit_card_type;
+    
+    if(selec.selectedIndex == undefined) {
+        selec.selectedIndex = 0;
+        }
+    var thisOne = selec.selectedIndex;
+    
+    // Find the profile for the selected credit card type
+    selnam = profileType[thisOne];
+
+// We are getting error messages the order profile "undefined"
+// This may be coming from here ... let's see whether the message changes
+if(selnam == undefined) {
+        selname = "axr.js_error.pay_sel." + thisOne;
+}
+
+    
+    // Set mv_order_profile to name of the profile for the selected payment type
+    var profile = form.mv_order_profile;
+    profile.value = selnam;
+    
+    
+    // Find (all) the elements with class selected
+    findActive = document.getElementsByClassName('selected');
+    // Change them all (should only be 1) to not selected
+    for (var i = 0 ; i < findActive.length ; i++) {
+        findActive[i].className = 'not_selected';
+    }
+    // Find the element with name id and set its class to selected
+    var newSelected = $(selnam);
+    
+    newSelected.set('class','selected');
+}
+
+//simple email validation double up for the checkout page
+function checkEmail(email) {
+    var firstEmail = document.checkout.emailv.value;
+    var emailRegxp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (firstEmail != email) {
+        document.checkout.email.value = '';
+        $('emailTypo').set('class','visible');
+    } else {
+        if (emailRegxp.test(email)) {
+            $('emailTypo').set('class','hidden');
+            $('badEmail').set('class','hidden');
+        } else {
+            document.checkout.email.value = '';
+            $('badEmail').set('class','visible');
+        }
+    }
+
+}
+
+
+//simple watcard validation
+function set_card_type (num) {
+
+        var ti = document.getElementById('textindication');
+        ti.innerHTML = '';
+
+        var type;
+        var desc;
+
+        if(num == undefined)
+                return;
+
+        if(num.length == '8')  {
+                type = 'watcard';
+                desc = 'Confirmed: (Watcard)';
+                if (num.substr(0,3) == '505') {
+                    type = 'wcdeptch';
+                    desc = 'Confirmed: (Watcard (Departmental))';
+                }
+                if (num.substr(0,3) == '506') {
+                    type = 'wcdeptch';
+                    desc = 'Confirmed: (Watcard (Departmental (Ext)))';
+                }
+        }
+
+        if( desc != undefined ) {
+                ti.innerHTML = desc;
+                document.checkout.mv_credit_card_type.value = type;
+        }
+}
+
+
+//Waterloo Store Functions
+
+function showSizeSelect(clicked,target) {
+    var activeColour = document.getElementsByClassName('ws_colour_selected');
+    if (activeColour.length > 0){
+            Array.each(activeColour, function(el) {
+                                    var thisId = el.get('id');
+                                    var targetOff = thisId + "_size";
+                                    $(el).set('class','ws_colour_container');
+                                    $(targetOff).set('class','size_select_off');
+                                    });
+        }
+    $(clicked).set('class','ws_colour_selected');
+    $(target).set('class','ws_size_select_on');
+    
+
+}
+//adds an onclick event containing the display function for size select on all the colour swatches on a page
+function addSizeSelect() {
+    var swatches = document.getElementsByClassName('ws_colour_container');
+    Array.each(swatches, function(colour) {
+                            $(colour).addEvent('click',function() {
+                                                             var thisId = this.get('id');
+                                                             var thisTarget = thisId + '_size';
+                                                             showSizeSelect(thisId,thisTarget);
+                                                             });
+                            });
+    }
+    
+//adds an onclick event containing the detail panel function on all the view larger buttons on a page
+function addViewLarger() {
+    var zoomers = document.getElementsByClassName('view_larger');
+    Array.each(zoomers, function(zoom) {
+                            $(zoom).addEvent('click',function() {
+                                                              var thisId = this.get('id');
+                                                              detailPanel(thisId);
+                                                              });
+                            });
+    
+    
+    }
+
+
+
+//build the detail panel
+function detailPanel(detailId) {
+        //make sure to reset any selected colour swatches before loading
+        var alreadySelected = document.getElementsByClassName('ws_colour_selected');
+        Array.each(alreadySelected, function(selected) {
+                                            $(selected).set('class','ws_colour_container');
+                                        });
+        //turn off corresponding size selection
+        var sizeSelected = document.getElementsByClassName('ws_size_select_on');
+        Array.each(sizeSelected, function(sizeSelected) {
+                                            $(sizeSelected).set('class','size_select_off');
+                                     });
+        
+        var target = $(detailId).get('title'); //webid stored in the title property of the view_larger image
+        //build the detail panel
+        var panelInner = new Element('div',{'class':'detail_inner'});
+        //grab the item title, make a copy then add it to the detail panel
+        var titleTarget = target+'_title';
+        var panelTitle = $(titleTarget).clone();
+        panelTitle.inject(panelInner);  
+        //grab the item description, make a copy then add it to the detail panel
+        var descTarget = target+'_description';
+        var panelDesc = $(descTarget).clone();
+        panelDesc.inject(panelInner);
+        //grab the item price, make a copy then add it to the detail panel
+        var priceTarget = target+'_price';
+        var panelPrice = $(priceTarget).clone();
+        panelPrice.inject(panelInner);
+        //grab the colour swatch container, make a copy, reset the class to the panel version and add it to the detail panel
+        var panelColoursTarget = target+'_colour_wrap';
+        var panelColours = $(panelColoursTarget).clone();
+        panelColours.set('class','detail_colour_container');
+        panelColours.inject(panelInner);
+        
+        //grab all the colour swatches in the panelColours container
+        var panelSwatches = panelColours.getChildren('.ws_colour_container');
+        Array.each(panelSwatches, function(swatch) {
+                                      var thisSwatch = swatch.getChildren('.ws_colour_swatch');
+                                      var thisColour = thisSwatch.get('title')
+                                      swatch.addEvent('click', function(){
+                                                                        swapImage(target,swatch,thisColour);
+                                                                        });
+                                      });
+        
+        
+        //build the image and container
+        var panelImageWrap = new Element('div', {'class':'detail_image_wrap'});
+        var panelImage = new Element ('img', {'class':'detail_image', 'id': target+'_detail_image','src':'https://info.uwaterloo.ca/waterloostore/images/webstore/product/'+target+'.jpg'});
+        panelImage.inject(panelImageWrap);
+        panelImageWrap.inject(panelInner);
+
+        
+        //make the main container
+        var panel = new Element('div',{'class':'detail_panel','id':detailId+'_detail'});
+        //put everything in it
+        panelInner.inject(panel);
+        //make a 'click to close' note for the top left
+        var clickNote = new Element('p',{'class':'click_note', 'html':'click to close'});
+        clickNote.inject(panel);
+//cover the rest of the page in a translucent backdrop
+        var backdrop = new Element ('div', {'id':'backdrop'});
+        backdrop.inject($('body'));
+        panel.inject($(backdrop));
+//add click-to-close to the click to close
+        clickNote.addEvent('click',function() {
+                                              panel.destroy();
+                                              backdrop.destroy();
+                                              //closeNote.destroy();
+                                              });
+
+}
+
+//image swapper for view larger panel
+function swapImage(webId,clicked,colour) {
+    //set the clicked item to have a border
+    var activeColour = document.getElementsByClassName('ws_colour_selected');
+    if (activeColour.length > 0){
+        Array.each(activeColour, function(el) {
+                                var thisId = el.get('id');
+                                $(el).set('class','ws_colour_container');
+                                });
+    }
+    $(clicked).set('class','ws_colour_selected');
+    
+    //set the image source to the appropriate colour
+    var newImage = webId +'_'+colour;
+    var targetImage = webId +'_detail_image';
+    $(targetImage).set('src','https://info.uwaterloo.ca/waterloostore/images/webstore/product/'+newImage+'.jpg');
+    }
+    
+    
+
+
+//lets the add to cart button interact with munge_quantity properly
+function buyThis (target,setTo){
+    var mvTarget = $(target);
+    mvTarget.set('value',setTo);
+    document.itemSelect.submit();
+    }
+
+
+//INTITIALIZATION   
+
+//waterloo store init functions
+function wstore_init(){
+    addSizeSelect();
+    addViewLarger();
+    }
+
+
+
+//initialize everything we need for page load
+window.addEvent('domready', function() {
+    checkHeaderSearch(); //checks to see the searchbox in the header is set
+    cartToolTip(); //cart tooltip for all pages
+    wstore_init(); //adds page functions for Waterloo Store
+    //bstore_init(); //adds page functions for Book Store
+    payTypes(); //gathers available payment types for checkout page 
+});
+</script>
+
+
+<script type="text/javascript" src="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/javascript_utility_functions.js"></script>
+<script type="text/javascript" src="https://fortuna.uwaterloo.ca/rs/interchange/allcatalogs/uw_design_specific.js"></script>
+
+
+
+
+
+<style type="text/css" media="screen">
+#wrapper {
+    background: #FFF url(https://info.uwaterloo.ca/printondemand/images/POD_Titles_Image_small2.jpg) no-repeat 680px 165px;
+}
+</style>
+
+
+<script type="text/javascript">
+    //initialize everything we need for page load
+    window.addEvent('domready', function() {
+    
+    
+    });
+</script>
+
+
+
+<script type="text/javascript">
+//simple email validation double up for the checkout page
+function checkEmail(email) {
+    var firstEmail = document.checkout.emailv.value;
+    var emailRegxp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (firstEmail != email) {
+        document.checkout.email.value = '';
+        $('emailTypo').set('class','visible');
+    } else {
+        if (emailRegxp.test(email)) {
+            $('emailTypo').set('class','hidden');
+            $('badEmail').set('class','hidden');
+        } else {
+            document.checkout.email.value = '';
+            $('badEmail').set('class','visible');
+        }
+    }
+
+}
+</script>
+
+</head>
+<body>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-889169-16']);
+  _gaq.push(['_setDomainName', 'uwaterloo.ca']);
+  _gaq.push(['_setAllowLinker', true]);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+<div id="shadow">
+<div id="body_wrap">
+<div id="body">
+<div id="sidebar"><img id="wordmark" src="https://info.uwaterloo.ca/bookstore/images/bookstore_wm.png" alt="BookStore" name="wordmark" /></div>
+<div id="wrapper">
+<div id="header">
+<div id="header_common"><a href="http://www.retailservices.uwaterloo.ca/hours.html">Hours</a> | <a href="http://www.retailservices.uwaterloo.ca/promotions.html">Promotions</a> | <a href="http://www.retailservices.uwaterloo.ca/rsinsider.html">RS Insider</a></div>
+<div id="search_wrapper">
+    
+    <div id="search_inner">
+    <p id="search_select">
+    <label><input type="radio" name="search_select" class="search_select" onclick="headerSearchSelect('uwsearch')"  />uWaterloo</label>
+    <label><input type="radio" checked="checked" name="search_select" class="search_select" onclick="headerSearchSelect('storesearch')" selected="true"/> BookLook <span id="search_subtitle">(Author/Title)</span></label>
+    </p>
+    <a id="searchTag" name="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html"></a>
+    <form id="headerSearchSelect" action="">
+    <label for="search submit"><input type="image" id="search_submit" src="https://info.uwaterloo.ca/retailservices/images/common/search_button.gif" /></label>
+    <lebel for="search term"><input type="text" id="searchbox" name="mv_searchspec" /></label>
+    <input TYPE=hidden NAME=mv_profile VALUE="search_book">
+
+
+    </form>
+    </div><!-- end #search_inner-->
+    
+    <div id="cart">
+        <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/ord/basket.html" title="You have 0 items in your cart" class="cartDisplay">
+        
+    <img src="https://info.uwaterloo.ca/bookstore/images/webstore/cart_blank.gif" alt="Shopping Cart"/>
+    
+        </a>
+    </div>
+</div><!-- end #search_wrapper" -->
+<div><!-- empty div corrects float/absolute position bug in IE --></div>
+
+    <!-- begin store_links in include/layout -->
+<div id="store_links">
+<ul id="stores_nav">
+    <li><a id="bookstore_nav" href="http://www.bookstore.uwaterloo.ca"><span class="store_nav_text">BookStore</span></a></li>
+    <li><a id="campustech_nav" href="http://www.campustech.uwaterloo.ca"><span class="store_nav_text">CampusTech</span></a></li>
+    <li><a id="uprint_nav" href="http://uprint.uwaterloo.ca"><span class="store_nav_text">uPrint</span></a></li>
+    <li><a id="mediadoc_nav" href="http://www.mediadoc.uwaterloo.ca"><span class="store_nav_text">Media.doc</span></a></li>
+    <li><a id="waterloostore_nav" href="http://www.waterloostore.uwaterloo.ca"><span class="store_nav_text">WaterlooStore</span></a></li>
+    <li><a id="writestuff_nav" href="http://www.writestuff.uwaterloo.ca"><span class="store_nav_text">WriteStuff</span></a></li>
+</ul>
+</div>
+<!-- end store_links in include/layout -->
+
+
+<div id="title_wrapper"><img id="title" src="https://info.uwaterloo.ca/bookstore/images/navtitles/navtitle_books.jpg" alt="Books" name="title" /> <img id="subtitle" src="https://info.uwaterloo.ca/bookstore/images/subnavtitles/subnavtitle_booklook.jpg" alt="BookLook" name="subtitle" /></div>
+</div>
+    <!-- begin bookstore_nav in include/layout -->
+<div id="navigation">
+<ul class="main_nav">
+  <li><a href="#">BOOKS</a>
+      <ul class="sub_nav">
+        <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/index.html">BookLook</a></li>
+    
+        <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_ondemand.html">Print On Demand (POD) Search</a></li>
+    
+        <li><a href="https://fortuna.uwaterloo.ca/auth-cgi-bin/cgiwrap/rsic/book/search_student.html">My BookLook</a></li>
+    <li><a href="http://www.bookstore.uwaterloo.ca/textrental.html">Text Rental</a></li>
+    <li><a href="http://bookstore.uwaterloo.ca/redeem.html">Redeem In Store Code</a></li>  
+    <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/architecture.html">Architecture Books</a></li>
+        <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/optometry.html">Optometry Books</a></li>
+        <li><a href="http://www.bookstore.uwaterloo.ca/special_orders.html">Special Orders</a></li>
+      </ul>
+  </li>
+<li><a href="http://www.bookstore.uwaterloo.ca/accesscodes.html">ACCESS CODES</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/copyrightrules.html">COPYRIGHT RULES</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/courseware/index.php">COURSEWARE</a></li>
+  <li><a href="http://www.printondemand.uwaterloo.ca/home.html">PRINT ON DEMAND</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/linelook.html">LINELOOK</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/author_events.html">AUTHOR EVENTS</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/info_faculty.html">INFO FOR FACULTY</a></li>
+<li><a href="http://www.bookstore.uwaterloo.ca/info_parents.html">INFO FOR PARENTS</a></li>
+<li><a href="http://www.bookstore.uwaterloo.ca/info_firstyear.html">INFO FOR<br />1ST YEAR STUDENTS</a></li>
+<li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/special/giftcards.html">GIFT CARDS</a></li>
+</ul>
+</div><!-- end #navigation -->
+<!-- end bookstore_nav in include/layout -->
+
+
+
+
+<div id="big_bubble"><img src="https://info.uwaterloo.ca/bookstore/images/bubble/bigbubble_frame.png" alt="decorative frame" /></div>
+
+
+<div id="content">
+<div id="checkout_link"><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/ord/basket.html"><img src="https://info.uwaterloo.ca/retailservices/images/common/check_out.gif" alt="Check Out"/></a></div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- end LAYOUT_TOP in regions -->
+
+<!-- BEGIN CONTENT -->
+<!-- END CONTENT -->
+<!-- begin LAYOUT_BOTTOM in regions -->
+
+
+
+
+<!-- BEGIN COMPONENT search_box_course -->
+<div id="search_box_course" class="body_searchbox">
+
+
+<!-- Page Generated Mon Dec 15 10:18:26 2014 -->
+
+ 
+<!-- Department List Generated Mon Dec 15 10:18:26 2014 -->
+<h2>Search By Course:</h2>
+<p><strong>Select the term, department and course to search,
+and click on <em>Add to cart</em> to purchase online</strong></p>
+    <form action="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html" method=post>
+    <input TYPE=hidden NAME=mv_profile VALUE="search_course">
+    <p>
+    
+    </p>
+
+    
+        
+        
+        
+        
+        
+    
+
+        <table id="course_search">
+        <tr>
+       
+        <td> <B>Term:</B></td>
+        <td>
+            
+            <select NAME="mv_searchspec" size="1">
+            
+                <option VALUE="1151"
+                
+                    SELECTED="SELECTED"
+                
+                >
+                Winter 2015 (1151)
+                </option>
+            
+                <option VALUE="1149"
+                
+                >
+                Fall 2014 (1149)
+                </option>
+            
+                <option VALUE="1145"
+                
+                >
+                Spring 2014 (1145)
+                </option>
+            
+                <option VALUE="1141"
+                
+                >
+                Winter 2014 (1141)
+                </option>
+            
+                <option VALUE="1109"
+                
+                >
+                Fall 2010 (1109)
+                </option>
+            
+                <option VALUE="1105"
+                
+                >
+                Spring 2010 (1105)
+                </option>
+            
+                <option VALUE="1101"
+                
+                >
+                Winter 2010 (1101)
+                </option>
+            
+                <option VALUE="1099"
+                
+                >
+                Fall 2009 (1099)
+                </option>
+            
+                <option VALUE="1095"
+                
+                >
+                Spring 2009 (1095)
+                </option>
+            
+                <option VALUE="1091"
+                
+                >
+                Winter 2009 (1091)
+                </option>
+            
+                <option VALUE="1089"
+                
+                >
+                Fall 2008 (1089)
+                </option>
+            
+                <option VALUE="1085"
+                
+                >
+                Spring 2008 (1085)
+                </option>
+            
+                <option VALUE="1081"
+                
+                >
+                Winter 2008 (1081)
+                </option>
+            
+                <option VALUE="1079"
+                
+                >
+                Fall 2007 (1079)
+                </option>
+            
+                <option VALUE="1075"
+                
+                >
+                Spring 2007 (1075)
+                </option>
+            
+                <option VALUE="1071"
+                
+                >
+                Winter 2007 (1071)
+                </option>
+            
+                <option VALUE="1069"
+                
+                >
+                Fall 2006 (1069)
+                </option>
+            
+                <option VALUE="1065"
+                
+                >
+                Spring 2006 (1065)
+                </option>
+            
+                <option VALUE="1061"
+                
+                >
+                Winter 2006 (1061)
+                </option>
+            
+                <option VALUE="1059"
+                
+                >
+                Fall 2005 (1059)
+                </option>
+            
+                <option VALUE="1049"
+                
+                >
+                Fall 2004 (1049)
+                </option>
+            
+            </select></td>
+            </tr>
+            <tr>
+            <td><B>Department:</B></td>
+            <td>
+            
+            <select NAME="mv_searchspec" size="1">
+            <option VALUE="">Select Department</option>
+            
+                <option VALUE="ACC"
+                
+                >ACC</option>
+            
+                <option VALUE="ACTSC"
+                
+                >ACTSC</option>
+            
+                <option VALUE="AFM"
+                
+                >AFM</option>
+            
+                <option VALUE="AHS"
+                
+                >AHS</option>
+            
+                <option VALUE="AMATH"
+                
+                >AMATH</option>
+            
+                <option VALUE="ANTH"
+                
+                >ANTH</option>
+            
+                <option VALUE="APPLS"
+                
+                >APPLS</option>
+            
+                <option VALUE="ARBUS"
+                
+                >ARBUS</option>
+            
+                <option VALUE="ARCH"
+                
+                >ARCH</option>
+            
+                <option VALUE="ARTS"
+                
+                >ARTS</option>
+            
+                <option VALUE="BASE"
+                
+                >BASE</option>
+            
+                <option VALUE="BE"
+                
+                >BE</option>
+            
+                <option VALUE="BET"
+                
+                >BET</option>
+            
+                <option VALUE="BIOL"
+                
+                >BIOL</option>
+            
+                <option VALUE="BME"
+                
+                >BME</option>
+            
+                <option VALUE="BUS"
+                
+                >BUS</option>
+            
+                <option VALUE="CANC"
+                
+                >CANC</option>
+            
+                <option VALUE="CHE"
+                
+                >CHE</option>
+            
+                <option VALUE="CHEM"
+                
+                >CHEM</option>
+            
+                <option VALUE="CHINA"
+                
+                >CHINA</option>
+            
+                <option VALUE="CIVE"
+                
+                >CIVE</option>
+            
+                <option VALUE="CLAS"
+                
+                >CLAS</option>
+            
+                <option VALUE="CM"
+                
+                >CM</option>
+            
+                <option VALUE="CMW"
+                
+                >CMW</option>
+            
+                <option VALUE="CO"
+                
+                >CO</option>
+            
+                <option VALUE="COGSCI"
+                
+                >COGSCI</option>
+            
+                <option VALUE="COMM"
+                
+                >COMM</option>
+            
+                <option VALUE="CROAT"
+                
+                >CROAT</option>
+            
+                <option VALUE="CS"
+                
+                    SELECTED="SELECTED"
+                
+                >CS</option>
+            
+                <option VALUE="CT"
+                
+                >CT</option>
+            
+                <option VALUE="DAC"
+                
+                >DAC</option>
+            
+                <option VALUE="DEI"
+                
+                >DEI</option>
+            
+                <option VALUE="DRAMA"
+                
+                >DRAMA</option>
+            
+                <option VALUE="DUTCH"
+                
+                >DUTCH</option>
+            
+                <option VALUE="EARTH"
+                
+                >EARTH</option>
+            
+                <option VALUE="EASIA"
+                
+                >EASIA</option>
+            
+                <option VALUE="ECE"
+                
+                >ECE</option>
+            
+                <option VALUE="ECON"
+                
+                >ECON</option>
+            
+                <option VALUE="ENBUS"
+                
+                >ENBUS</option>
+            
+                <option VALUE="ENGL"
+                
+                >ENGL</option>
+            
+                <option VALUE="ENVE"
+                
+                >ENVE</option>
+            
+                <option VALUE="ENVS"
+                
+                >ENVS</option>
+            
+                <option VALUE="ERS"
+                
+                >ERS</option>
+            
+                <option VALUE="ESL"
+                
+                >ESL</option>
+            
+                <option VALUE="FINE"
+                
+                >FINE</option>
+            
+                <option VALUE="FR"
+                
+                >FR</option>
+            
+                <option VALUE="GBDA"
+                
+                >GBDA</option>
+            
+                <option VALUE="GEMCC"
+                
+                >GEMCC</option>
+            
+                <option VALUE="GENE"
+                
+                >GENE</option>
+            
+                <option VALUE="GEOE"
+                
+                >GEOE</option>
+            
+                <option VALUE="GEOG"
+                
+                >GEOG</option>
+            
+                <option VALUE="GER"
+                
+                >GER</option>
+            
+                <option VALUE="GERON"
+                
+                >GERON</option>
+            
+                <option VALUE="GGOV"
+                
+                >GGOV</option>
+            
+                <option VALUE="GRK"
+                
+                >GRK</option>
+            
+                <option VALUE="HIST"
+                
+                >HIST</option>
+            
+                <option VALUE="HLTH"
+                
+                >HLTH</option>
+            
+                <option VALUE="HRM"
+                
+                >HRM</option>
+            
+                <option VALUE="HSG"
+                
+                >HSG</option>
+            
+                <option VALUE="HUMSC"
+                
+                >HUMSC</option>
+            
+                <option VALUE="IAIN"
+                
+                >IAIN</option>
+            
+                <option VALUE="INDEV"
+                
+                >INDEV</option>
+            
+                <option VALUE="INTEG"
+                
+                >INTEG</option>
+            
+                <option VALUE="INTST"
+                
+                >INTST</option>
+            
+                <option VALUE="ISS"
+                
+                >ISS</option>
+            
+                <option VALUE="ITAL"
+                
+                >ITAL</option>
+            
+                <option VALUE="ITALST"
+                
+                >ITALST</option>
+            
+                <option VALUE="JAPAN"
+                
+                >JAPAN</option>
+            
+                <option VALUE="JP"
+                
+                >JP</option>
+            
+                <option VALUE="JS"
+                
+                >JS</option>
+            
+                <option VALUE="KIN"
+                
+                >KIN</option>
+            
+                <option VALUE="KOREA"
+                
+                >KOREA</option>
+            
+                <option VALUE="LAT"
+                
+                >LAT</option>
+            
+                <option VALUE="LED"
+                
+                >LED</option>
+            
+                <option VALUE="LS"
+                
+                >LS</option>
+            
+                <option VALUE="MATBUS"
+                
+                >MATBUS</option>
+            
+                <option VALUE="MATH"
+                
+                >MATH</option>
+            
+                <option VALUE="MCT"
+                
+                >MCT</option>
+            
+                <option VALUE="ME"
+                
+                >ME</option>
+            
+                <option VALUE="MEDVL"
+                
+                >MEDVL</option>
+            
+                <option VALUE="MNS"
+                
+                >MNS</option>
+            
+                <option VALUE="MSCI"
+                
+                >MSCI</option>
+            
+                <option VALUE="MTE"
+                
+                >MTE</option>
+            
+                <option VALUE="MTHEL"
+                
+                >MTHEL</option>
+            
+                <option VALUE="MUSIC"
+                
+                >MUSIC</option>
+            
+                <option VALUE="NE"
+                
+                >NE</option>
+            
+                <option VALUE="OPTOM"
+                
+                >OPTOM</option>
+            
+                <option VALUE="PACS"
+                
+                >PACS</option>
+            
+                <option VALUE="PHARM"
+                
+                >PHARM</option>
+            
+                <option VALUE="PHIL"
+                
+                >PHIL</option>
+            
+                <option VALUE="PHS"
+                
+                >PHS</option>
+            
+                <option VALUE="PHYS"
+                
+                >PHYS</option>
+            
+                <option VALUE="PLAN"
+                
+                >PLAN</option>
+            
+                <option VALUE="PMATH"
+                
+                >PMATH</option>
+            
+                <option VALUE="PORT"
+                
+                >PORT</option>
+            
+                <option VALUE="PS"
+                
+                >PS</option>
+            
+                <option VALUE="PSCI"
+                
+                >PSCI</option>
+            
+                <option VALUE="PSYCH"
+                
+                >PSYCH</option>
+            
+                <option VALUE="REC"
+                
+                >REC</option>
+            
+                <option VALUE="REES"
+                
+                >REES</option>
+            
+                <option VALUE="RS"
+                
+                >RS</option>
+            
+                <option VALUE="RUSS"
+                
+                >RUSS</option>
+            
+                <option VALUE="SCBUS"
+                
+                >SCBUS</option>
+            
+                <option VALUE="SCI"
+                
+                >SCI</option>
+            
+                <option VALUE="SDS"
+                
+                >SDS</option>
+            
+                <option VALUE="SE"
+                
+                >SE</option>
+            
+                <option VALUE="SI"
+                
+                >SI</option>
+            
+                <option VALUE="SMF"
+                
+                >SMF</option>
+            
+                <option VALUE="SOC"
+                
+                >SOC</option>
+            
+                <option VALUE="SOCWK"
+                
+                >SOCWK</option>
+            
+                <option VALUE="SPAN"
+                
+                >SPAN</option>
+            
+                <option VALUE="SPCOM"
+                
+                >SPCOM</option>
+            
+                <option VALUE="SPD"
+                
+                >SPD</option>
+            
+                <option VALUE="STAT"
+                
+                >STAT</option>
+            
+                <option VALUE="STV"
+                
+                >STV</option>
+            
+                <option VALUE="SUSM"
+                
+                >SUSM</option>
+            
+                <option VALUE="SWK"
+                
+                >SWK</option>
+            
+                <option VALUE="SWREN"
+                
+                >SWREN</option>
+            
+                <option VALUE="SYDE"
+                
+                >SYDE</option>
+            
+                <option VALUE="TOUR"
+                
+                >TOUR</option>
+            
+                <option VALUE="TS"
+                
+                >TS</option>
+            
+                <option VALUE="UNIV"
+                
+                >UNIV</option>
+            
+                <option VALUE="VCULT"
+                
+                >VCULT</option>
+            
+                <option VALUE="WS"
+                
+                >WS</option>
+            
+            </select></td>
+        </tr>
+        <tr>
+            
+           <td> <B>Course:</B></td>
+           <td><INPUT MAXLENGTH=5 size=5 NAME=mv_searchspec type=text
+                    value="135" /></td>
+        <tr>
+                   <td>Section (Optional):</td>
+           <td><INPUT MAXLENGTH=3 size=3 NAME=mv_searchspec type=text
+                    value="" /></td>
+                </tr>
+        <tr>   
+           <td>Instructor (Optional):</td>
+           <td><INPUT MAXLENGTH=20 size=20 NAME=mv_searchspec type=text
+                    value="" /></td>
+        </tr>
+        </table>
+            <input type=submit value="SEARCH" class="search_button">
+    </form>
+
+    <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_book.html">Author/Title Search</a>
+    | <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_advanced.html">Advanced Search</a>
+
+
+</div><!--end #search_box_course -->
+<!-- END COMPONENT search_box_course -->
+
+
+
+
+<!-- BEGIN COMPONENT results_courses -->
+
+    
+<!-- begin munge_quantity in include/javascript -->
+    
+
+    
+
+    
+
+
+
+<style type="text/css">
+    .no_image_biblioshare {
+    background: url("") no-repeat scroll center center transparent;
+    color: #999999;    display: block;    height: 120px;
+    margin-left: 10px;
+    width: 100px;
+    }
+</style>
+
+
+            
+
+    
+
+ 
+    
+
+   
+   
+       
+   
+
+        
+    <form name="courseSubmit" ACTION="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/nothing.html" METHOD=POST>
+        <input TYPE=hidden NAME=mv_session_id value="BBkgBv24">
+        <input TYPE=hidden NAME=mv_action VALUE=refresh>
+        <input type="hidden" name="mv_click" value="munge_quantity">    
+        <input type="hidden" name="first_match" value="">
+
+        
+        
+            <div >
+            <h1 class="book_section">
+                CS
+                135
+                - Winter 2015 (1151)
+                </h1>
+            </div>
+        
+
+        
+           <div class="book_subsection">
+            <h2>Section: 
+            
+            001 Vasiga,Troy Michael</h2>
+            <input type="image" class="add_all_cart" src="https://info.uwaterloo.ca/bookstore/images/webstore/add_all_cart.gif" alt="Add all items for this course" onClick="addAllCourse('1151CS135001');" />
+                    
+                    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+                    <input type=hidden name="mv_order_item" value="TX.9780262062183">
+                    <input type=hidden name="mv_order_orderline_term" value="1151">
+                    <input type=hidden name="mv_order_orderline_department" value="CS">
+                    <input type=hidden name="mv_order_orderline_course" value="135">
+                    <input type=hidden name="mv_order_orderline_section" value="001">
+                    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+                    <input type=hidden name="mv_order_orderline_reqopt" value="O">
+                    <input type=hidden name="mv_oi1" value="">
+                    <input class="1151CS135001" type=hidden name="mv_order_quantity" size=2 value="">
+                    
+                    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+                    <input type=hidden name="mv_order_item" value="TX.9781464185922">
+                    <input type=hidden name="mv_order_orderline_term" value="1151">
+                    <input type=hidden name="mv_order_orderline_department" value="CS">
+                    <input type=hidden name="mv_order_orderline_course" value="135">
+                    <input type=hidden name="mv_order_orderline_section" value="001">
+                    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+                    <input type=hidden name="mv_order_orderline_reqopt" value="R">
+                    <input type=hidden name="mv_oi2" value="">
+                    <input class="1151CS135001" type=hidden name="mv_order_quantity" size=2 value="">
+                    
+
+        </div>
+            
+        
+
+        
+            
+
+
+ 
+     <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+     <input type=hidden name="mv_order_item" value="TX.9781464185922">
+      
+ 
+
+ 
+      
+ 
+
+        <div class="book_item">
+        <div class="book_image">
+        <span class="no_image_biblioshare">
+            
+                <img class="cover" src="https://fortuna.uwaterloo.ca/rs/interchange/cover_images/biblioshare_no_image_available.jpg" alt=""/>
+            
+        </span>
+         
+             
+            
+                <br><input type=button value="Add To Cart" alt="Add To Cart" onClick="this.form.mv_oi3.value='TX.9781464185922';this.form.submit()" class="add_cart" />
+            
+        
+         
+
+ 
+      
+ 
+
+</div>
+        <div class="book_info">         
+        <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+                
+                
+                    <p><span class="author">I-CLICKER</span>:<span class="title">I-CLICKER + RF RESPONSE REMOTE</span></p>
+       <p><span class="sku">SKU: 9781464185922</span></p>
+       
+       <p><span class="price">Price: 40.00</span></p>
+       <p><span class="stock">Estimated Copies Available:
+                1081
+                </span></p>
+     
+
+ 
+      
+ 
+
+
+
+
+    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+    <input type=hidden name="mv_order_orderline_term" value="1151">
+    <input type=hidden name="mv_order_orderline_department" value="CS">
+    <input type=hidden name="mv_order_orderline_course" value="135">
+    <input type=hidden name="mv_order_orderline_section" value="001">
+    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+    <input type=hidden name="mv_order_orderline_reqopt" value="R">
+    <input type=hidden name="mv_oi3" value="">
+    <input type=hidden name="mv_order_quantity" size=2 value="">
+
+    
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=I-CLICKER + RF RESPONSE REMOTE&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781464185922&fn=search&mode=Basic">ISBN Search</a></p>
+        </div><!-- end .book_info -->
+        <hr class="item_break"/>
+        </div><!-- end .book_item -->
+    
+        
+        
+
+        
+
+        
+            
+
+
+ 
+     <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+     <input type=hidden name="mv_order_item" value="TX.9780262062183">
+      
+ 
+
+ 
+      
+ 
+
+        <div class="book_item">
+        <div class="book_image">
+        <span class="no_image_biblioshare">
+            
+                <img class="cover" src="https://fortuna.uwaterloo.ca/rs/interchange/cover_images/biblioshare_cache/9780262062183.jpg" alt=""/>
+            
+        </span>
+         
+             
+            
+                <br><input type=button value="Add To Cart" alt="Add To Cart" onClick="this.form.mv_oi4.value='TX.9780262062183';this.form.submit()" class="add_cart" />
+            
+        
+         
+
+ 
+      
+ 
+
+</div>
+        <div class="book_info">         
+        <p><span style="font-weight: bold;">Optional Item</span></p> 
+                
+                
+                    <p><span class="author">FELLEISEN ET AL</span>:<span class="title">HOW TO DESIGN PROGRAMS</span></p>
+       <p><span class="sku">SKU: 9780262062183</span></p>
+       
+       <p><span class="price">Price: 97.00</span></p>
+       <p><span class="stock">Estimated Copies Available:
+                50
+                </span></p>
+     
+
+ 
+      
+ 
+
+
+
+
+    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+    <input type=hidden name="mv_order_orderline_term" value="1151">
+    <input type=hidden name="mv_order_orderline_department" value="CS">
+    <input type=hidden name="mv_order_orderline_course" value="135">
+    <input type=hidden name="mv_order_orderline_section" value="001">
+    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+    <input type=hidden name="mv_order_orderline_reqopt" value="O">
+    <input type=hidden name="mv_oi4" value="">
+    <input type=hidden name="mv_order_quantity" size=2 value="">
+
+    
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=HOW TO DESIGN PROGRAMS&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780262062183&fn=search&mode=Basic">ISBN Search</a></p>
+        </div><!-- end .book_info -->
+        <hr class="item_break"/>
+        </div><!-- end .book_item -->
+    
+        
+        
+
+        
+           <div class="book_subsection">
+            <h2>Section: 
+            
+            002 Vasiga,Troy Michael</h2>
+            <input type="image" class="add_all_cart" src="https://info.uwaterloo.ca/bookstore/images/webstore/add_all_cart.gif" alt="Add all items for this course" onClick="addAllCourse('1151CS135002');" />
+                    
+                    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+                    <input type=hidden name="mv_order_item" value="TX.9781464185922">
+                    <input type=hidden name="mv_order_orderline_term" value="1151">
+                    <input type=hidden name="mv_order_orderline_department" value="CS">
+                    <input type=hidden name="mv_order_orderline_course" value="135">
+                    <input type=hidden name="mv_order_orderline_section" value="002">
+                    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+                    <input type=hidden name="mv_order_orderline_reqopt" value="R">
+                    <input type=hidden name="mv_oi5" value="">
+                    <input class="1151CS135002" type=hidden name="mv_order_quantity" size=2 value="">
+                    
+                    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+                    <input type=hidden name="mv_order_item" value="TX.9780262062183">
+                    <input type=hidden name="mv_order_orderline_term" value="1151">
+                    <input type=hidden name="mv_order_orderline_department" value="CS">
+                    <input type=hidden name="mv_order_orderline_course" value="135">
+                    <input type=hidden name="mv_order_orderline_section" value="002">
+                    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+                    <input type=hidden name="mv_order_orderline_reqopt" value="O">
+                    <input type=hidden name="mv_oi6" value="">
+                    <input class="1151CS135002" type=hidden name="mv_order_quantity" size=2 value="">
+                    
+
+        </div>
+            
+        
+
+        
+            
+
+
+ 
+     <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+     <input type=hidden name="mv_order_item" value="TX.9781464185922">
+      
+ 
+
+ 
+      
+ 
+
+        <div class="book_item">
+        <div class="book_image">
+        <span class="no_image_biblioshare">
+            
+                <img class="cover" src="https://fortuna.uwaterloo.ca/rs/interchange/cover_images/biblioshare_no_image_available.jpg" alt=""/>
+            
+        </span>
+         
+             
+            
+                <br><input type=button value="Add To Cart" alt="Add To Cart" onClick="this.form.mv_oi7.value='TX.9781464185922';this.form.submit()" class="add_cart" />
+            
+        
+         
+
+ 
+      
+ 
+
+</div>
+        <div class="book_info">         
+        <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+                
+                
+                    <p><span class="author">I-CLICKER</span>:<span class="title">I-CLICKER + RF RESPONSE REMOTE</span></p>
+       <p><span class="sku">SKU: 9781464185922</span></p>
+       
+       <p><span class="price">Price: 40.00</span></p>
+       <p><span class="stock">Estimated Copies Available:
+                1081
+                </span></p>
+     
+
+ 
+      
+ 
+
+
+
+
+    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+    <input type=hidden name="mv_order_orderline_term" value="1151">
+    <input type=hidden name="mv_order_orderline_department" value="CS">
+    <input type=hidden name="mv_order_orderline_course" value="135">
+    <input type=hidden name="mv_order_orderline_section" value="002">
+    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+    <input type=hidden name="mv_order_orderline_reqopt" value="R">
+    <input type=hidden name="mv_oi7" value="">
+    <input type=hidden name="mv_order_quantity" size=2 value="">
+
+    
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=I-CLICKER + RF RESPONSE REMOTE&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781464185922&fn=search&mode=Basic">ISBN Search</a></p>
+        </div><!-- end .book_info -->
+        <hr class="item_break"/>
+        </div><!-- end .book_item -->
+    
+        
+        
+
+        
+
+        
+            
+
+
+ 
+     <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+     <input type=hidden name="mv_order_item" value="TX.9780262062183">
+      
+ 
+
+ 
+      
+ 
+
+        <div class="book_item">
+        <div class="book_image">
+        <span class="no_image_biblioshare">
+            
+                <img class="cover" src="https://fortuna.uwaterloo.ca/rs/interchange/cover_images/biblioshare_cache/9780262062183.jpg" alt=""/>
+            
+        </span>
+         
+             
+            
+                <br><input type=button value="Add To Cart" alt="Add To Cart" onClick="this.form.mv_oi8.value='TX.9780262062183';this.form.submit()" class="add_cart" />
+            
+        
+         
+
+ 
+      
+ 
+
+</div>
+        <div class="book_info">         
+        <p><span style="font-weight: bold;">Optional Item</span></p> 
+                
+                
+                    <p><span class="author">FELLEISEN ET AL</span>:<span class="title">HOW TO DESIGN PROGRAMS</span></p>
+       <p><span class="sku">SKU: 9780262062183</span></p>
+       
+       <p><span class="price">Price: 97.00</span></p>
+       <p><span class="stock">Estimated Copies Available:
+                50
+                </span></p>
+     
+
+ 
+      
+ 
+
+
+
+
+    <input TYPE=hidden NAME="mv_separate_items" VALUE="0">
+    <input type=hidden name="mv_order_orderline_term" value="1151">
+    <input type=hidden name="mv_order_orderline_department" value="CS">
+    <input type=hidden name="mv_order_orderline_course" value="135">
+    <input type=hidden name="mv_order_orderline_section" value="002">
+    <input type=hidden name="mv_order_orderline_instructor" value="Vasiga,Troy Michael">
+    <input type=hidden name="mv_order_orderline_reqopt" value="O">
+    <input type=hidden name="mv_oi8" value="">
+    <input type=hidden name="mv_order_quantity" size=2 value="">
+
+    
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=HOW TO DESIGN PROGRAMS&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780262062183&fn=search&mode=Basic">ISBN Search</a></p>
+        </div><!-- end .book_info -->
+        <hr class="item_break"/>
+        </div><!-- end .book_item -->
+    
+        
+           
+        
+    </form>
+    
+    <center>
+
+    
+</center>
+
+<br/>
+
+<!-- END COMPONENT results_courses -->
+
+
+
+
+
+
+</div><!-- end #content -->
+</div><!-- end #wrapper -->
+
+<div id="pagepin">
+<div id="footer"><a href="http://www.uwaterloo.ca"><img id="uWaterloo_wordmark" src="https://info.uwaterloo.ca/retailservices/images/common/uWaterloo_wordmark.gif" alt="University of Waterloo" name="uWaterloo_wordmark" /></a>
+<p><span id=" common"><a href="http://www.retailservices.uwaterloo.ca/contact.html">Contact Us</a> | <a href="http://www.uwaterloo.ca/privacy/">Privacy Policy</a> | <a href="http://www.retailservices.uwaterloo.ca/refund_faq.html">Refund Policy &amp; FAQ</a> | <a href="http://www.retailservices.uwaterloo.ca/student_employment.html">Student Employment</a> | <a href="http://www.retailservices.uwaterloo.ca/green/">Green Initiatives</a></span></p>
+<p><span id="address">200 University Avenue West, Waterloo, Ontario, Canada N2L 3G1</span> | <span id="phone">519 888 4673</span></p>
+<p id="web_address"><a href="http://www.retailservices.uwaterloo.ca">www.retailservices.uwaterloo.ca</a></p>
+</div><!-- end #footer -->
+
+</div><!-- end #pagepin -->
+
+</div><!-- end #body -->
+</div><!-- end #body_wrap -->
+</div><!-- end #shadow -->
+</body>
+</html>
+
+
+

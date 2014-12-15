@@ -1,0 +1,1934 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0066)https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" slick-uniqueid="3"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="robots" content="noindex,nofollow">
+<title>BookLook -- Course Search results</title>
+<link rel="stylesheet" type="text/css" href="./BookLook -- Course Search results_files/main.css">
+<link rel="stylesheet" type="text/css" href="./BookLook -- Course Search results_files/bookstore.css">
+<link type="text/css" rel="stylesheet" href="./BookLook -- Course Search results_files/buttons.css">
+<link type="text/css" rel="stylesheet" href="./BookLook -- Course Search results_files/tablesets.css">
+<link type="text/css" rel="stylesheet" href="./BookLook -- Course Search results_files/fieldsets.css">
+<link type="text/css" rel="stylesheet" href="./BookLook -- Course Search results_files/displaysets.css">
+<style>
+.hidden {display: none;}
+</style>
+<!-- conditional comment added for IE 6 printing, IE 5.5 will not print this page very well -->
+<!-- need to strip so the if gets passed to the browser -->
+<!--[if gte IE 6]>
+<style type="text/css" media="print">
+@import url("https://info.uwaterloo.ca/www/css/UWprint.css");
+</style>
+<![endif]-->
+<!-- this print will work in W3 Standard compliant browsers -->
+
+<script type="text/javascript" async="" src="./BookLook -- Course Search results_files/ga.js"></script><script type="text/javascript" src="./BookLook -- Course Search results_files/mootools-core-1.4.5.js"></script>
+<script type="text/javascript" src="./BookLook -- Course Search results_files/mootools-more.js"></script>
+<script type="text/javascript">// webstore scripts for all stores
+
+
+//GENERAL UTILITY FUNCTIONS
+//grabs all elements with the same class
+document.getElementsByClassName = function(cl) {    
+var retnode = [];
+    var myclass = new RegExp('\\b'+cl+'\\b');
+    var elem = this.getElementsByTagName('*');
+    for (var i = 0; i < elem.length; i++) {
+        var classes = elem[i].className;
+        if (myclass.test(classes)) retnode.push(elem[i]);
+    }
+    return retnode;
+}
+
+
+
+//WEBSTORE UTILITY FUNCTIONS
+//makes a happy little cart flyout to plonk the number of items in, styled in main.css
+function cartToolTip() {
+		var cartTip = new Tips('.cartDisplay',{
+							   	fixed: true, 
+								className: 'cartTip', //class name of the flyout container
+								offset: Browser.ie ? {'x':-206,'y':30} : {'x':9,'y':16}	 
+								//conditional for the crap IE7 javascript engine which measures everything different.
+							   });
+	
+	}
+
+//search type selector for header search
+function headerSearchSelect(searchTarget) {
+	var sTarget;
+	var sBox  = $('searchbox');
+	var sTag = $('searchTag').get('name'); // the https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html tag has to be there at page load to fill properly, stored in a#searchTag on page
+	if(searchTarget == 'uwsearch') {
+		sTarget = 'http://info.uwaterloo.ca/clfscripts/uwsearch.php?searchtype=google-uwdir-keyword';//main UW keyword search
+		$('headerSearchSelect').set('action',sTarget);
+		sBox.set('name','searchterm');
+		} else if (searchTarget == 'storesearch') {
+		sTarget = sTag;
+		sBox.set('name','mv_searchspec');
+		$('headerSearchSelect').set('action',sTarget);
+		}
+}
+
+//check to see if the searchbox action is set
+function checkHeaderSearch() {
+	var sAction  = $('headerSearchSelect').get('action');
+	var sTag = $('searchTag').get('name'); // the https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html tag has to be there at page load to fill properly, stored in a#searchTag on page
+	if (sAction == null) {
+		$('headerSearchSelect').set('action', sTag); //default the searchbox to the store search
+		} else {
+		//console.log('Action Set');	
+		}
+
+	
+}
+	
+//double checks that you do in fact want to remove something from the cart
+// could also use document.basket instead of obj.form
+function double_check(obj) {
+    var answer = confirm('Are you sure you want to remove this item?')
+        if (answer)
+        {
+	    obj.form.action = 'https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/process';
+            obj.form.submit();
+        } else {
+            obj.checked=false;
+        }
+    }
+
+//strips mv_todo for javascript validation
+function yesScript() {
+		if(document.checkout.mv_todo) {
+			document.checkout.mv_todo.value = '';
+			document.checkout.mv_click.type = 'button';
+			document.checkout.mv_click.addEvent('click', function() {
+										validateCard(); 
+			});
+		} else {//do nothing
+		}
+	}
+
+//checks to make sure there's a card type selected on the checkout page
+ function validateCard() {
+      	var profileVal = document.checkout.mv_order_profile.value;
+		var cardVal = document.checkout.mv_credit_card_type.value;
+		if (cardVal == 'none_selected') {
+				alert ('Please select a payment type before continuing');
+			} else {
+				document.checkout.mv_todo.value = 'submit';
+				document.checkout.submit();
+			}
+	}
+
+//collects all the hidden courseCatch loop elements, sets their value to one and submits the form to add them all to the cart
+function addAllCourse(course) {
+					thisCourseItems = document.getElementsByClassName(course);
+					for (var i = 0; i < thisCourseItems.length; i++) {
+						thisCourseItems[i].value = 1;
+					}
+					document.courseSubmit.submit()
+				}
+
+
+//marks the fact the province/state select box has changed before submitting the form for update
+function provinceChange() {
+		//console.log('Province Changed');
+		var goToPostal = Cookie.write('goTo','zip',{duration:0});
+		
+	}
+function zipChange() {
+		//console.log('PCode changed');
+	}
+
+function shipChange () {
+		//console.log('Shipping Changed'); 
+	}
+		
+
+//array of profile types available in the select
+var profileType = [];
+
+
+//gathers payment types for checkout page
+function payTypes() {
+	var getProfiles = document.getElementsByClassName('card_type');
+	Array.each(getProfiles, function(profile) {
+							   var el = $(profile);//necessary for IE to get all the Element methods from mootools
+							   var thisID = el.get('title');
+							   addPayType(thisID);					   
+							   });
+}
+
+//adds a payment type to the available set
+function addPayType(type) {
+	profileType[profileType.length] = type;	
+	}
+
+//finds/hides payment types on checkout page
+function payment_selector()
+{	
+	// find the checkout form
+    var form = document.checkout;
+    if(form == undefined)
+        return;
+    // find the payment type selector
+    var selec = form.mv_credit_card_type;
+	
+    if(selec.selectedIndex == undefined) {
+        selec.selectedIndex = 0;
+		}
+	var thisOne = selec.selectedIndex;
+	
+    // Find the profile for the selected credit card type
+    selnam = profileType[thisOne];
+
+// We are getting error messages the order profile "undefined"
+// This may be coming from here ... let's see whether the message changes
+if(selnam == undefined) {
+        selname = "axr.js_error.pay_sel." + thisOne;
+}
+
+	
+    // Set mv_order_profile to name of the profile for the selected payment type
+    var profile = form.mv_order_profile;
+    profile.value = selnam;
+	
+	
+    // Find (all) the elements with class selected
+    findActive = document.getElementsByClassName('selected');
+    // Change them all (should only be 1) to not selected
+    for (var i = 0 ; i < findActive.length ; i++) {
+        findActive[i].className = 'not_selected';
+    }
+    // Find the element with name id and set its class to selected
+    var newSelected = $(selnam);
+	
+	newSelected.set('class','selected');
+}
+
+//simple email validation double up for the checkout page
+function checkEmail(email) {
+	var firstEmail = document.checkout.emailv.value;
+	var emailRegxp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+	if (firstEmail != email) {
+		document.checkout.email.value = '';
+		$('emailTypo').set('class','visible');
+	} else {
+		if (emailRegxp.test(email)) {
+			$('emailTypo').set('class','hidden');
+			$('badEmail').set('class','hidden');
+		} else {
+			document.checkout.email.value = '';
+			$('badEmail').set('class','visible');
+		}
+	}
+
+}
+
+
+//simple watcard validation
+function set_card_type (num) {
+
+		var ti = document.getElementById('textindication');
+		ti.innerHTML = '';
+
+		var type;
+		var desc;
+
+		if(num == undefined)
+				return;
+
+		if(num.length == '8')  {
+				type = 'watcard';
+				desc = 'Confirmed: (Watcard)';
+				if (num.substr(0,3) == '505') {
+					type = 'wcdeptch';
+					desc = 'Confirmed: (Watcard (Departmental))';
+				}
+				if (num.substr(0,3) == '506') {
+					type = 'wcdeptch';
+					desc = 'Confirmed: (Watcard (Departmental (Ext)))';
+				}
+		}
+
+		if( desc != undefined ) {
+				ti.innerHTML = desc;
+				document.checkout.mv_credit_card_type.value = type;
+		}
+}
+
+
+//Waterloo Store Functions
+
+function showSizeSelect(clicked,target) {
+	var activeColour = document.getElementsByClassName('ws_colour_selected');
+	if (activeColour.length > 0){
+			Array.each(activeColour, function(el) {
+									var thisId = el.get('id');
+									var targetOff = thisId + "_size";
+									$(el).set('class','ws_colour_container');
+									$(targetOff).set('class','size_select_off');
+									});
+		}
+	$(clicked).set('class','ws_colour_selected');
+	$(target).set('class','ws_size_select_on');
+	
+
+}
+//adds an onclick event containing the display function for size select on all the colour swatches on a page
+function addSizeSelect() {
+	var swatches = document.getElementsByClassName('ws_colour_container');
+	Array.each(swatches, function(colour) {
+							$(colour).addEvent('click',function() {
+															 var thisId = this.get('id');
+															 var thisTarget = thisId + '_size';
+															 showSizeSelect(thisId,thisTarget);
+															 });
+							});
+	}
+	
+//adds an onclick event containing the detail panel function on all the view larger buttons on a page
+function addViewLarger() {
+	var zoomers = document.getElementsByClassName('view_larger');
+	Array.each(zoomers, function(zoom) {
+							$(zoom).addEvent('click',function() {
+															  var thisId = this.get('id');
+															  detailPanel(thisId);
+															  });
+							});
+	
+	
+	}
+
+
+
+//build the detail panel
+function detailPanel(detailId) {
+		//make sure to reset any selected colour swatches before loading
+		var alreadySelected = document.getElementsByClassName('ws_colour_selected');
+		Array.each(alreadySelected, function(selected) {
+											$(selected).set('class','ws_colour_container');
+										});
+		//turn off corresponding size selection
+		var sizeSelected = document.getElementsByClassName('ws_size_select_on');
+		Array.each(sizeSelected, function(sizeSelected) {
+									 		$(sizeSelected).set('class','size_select_off');
+									 });
+		
+		var target = $(detailId).get('title'); //webid stored in the title property of the view_larger image
+		//build the detail panel
+		var panelInner = new Element('div',{'class':'detail_inner'});
+		//grab the item title, make a copy then add it to the detail panel
+		var titleTarget = target+'_title';
+		var panelTitle = $(titleTarget).clone();
+		panelTitle.inject(panelInner);  
+		//grab the item description, make a copy then add it to the detail panel
+		var descTarget = target+'_description';
+		var panelDesc = $(descTarget).clone();
+		panelDesc.inject(panelInner);
+		//grab the item price, make a copy then add it to the detail panel
+		var priceTarget = target+'_price';
+		var panelPrice = $(priceTarget).clone();
+		panelPrice.inject(panelInner);
+		//grab the colour swatch container, make a copy, reset the class to the panel version and add it to the detail panel
+		var panelColoursTarget = target+'_colour_wrap';
+		var panelColours = $(panelColoursTarget).clone();
+		panelColours.set('class','detail_colour_container');
+		panelColours.inject(panelInner);
+		
+		//grab all the colour swatches in the panelColours container
+		var panelSwatches = panelColours.getChildren('.ws_colour_container');
+		Array.each(panelSwatches, function(swatch) {
+									  var thisSwatch = swatch.getChildren('.ws_colour_swatch');
+									  var thisColour = thisSwatch.get('title')
+									  swatch.addEvent('click', function(){
+																		swapImage(target,swatch,thisColour);
+																		});
+									  });
+		
+		
+		//build the image and container
+		var panelImageWrap = new Element('div', {'class':'detail_image_wrap'});
+		var panelImage = new Element ('img', {'class':'detail_image', 'id': target+'_detail_image','src':'https://info.uwaterloo.ca/waterloostore/images/webstore/product/'+target+'.jpg'});
+		panelImage.inject(panelImageWrap);
+		panelImageWrap.inject(panelInner);
+
+		
+		//make the main container
+		var panel = new Element('div',{'class':'detail_panel','id':detailId+'_detail'});
+		//put everything in it
+		panelInner.inject(panel);
+		//make a 'click to close' note for the top left
+		var clickNote = new Element('p',{'class':'click_note', 'html':'click to close'});
+		clickNote.inject(panel);
+//cover the rest of the page in a translucent backdrop
+		var backdrop = new Element ('div', {'id':'backdrop'});
+		backdrop.inject($('body'));
+		panel.inject($(backdrop));
+//add click-to-close to the click to close
+		clickNote.addEvent('click',function() {
+											  panel.destroy();
+											  backdrop.destroy();
+											  //closeNote.destroy();
+											  });
+
+}
+
+//image swapper for view larger panel
+function swapImage(webId,clicked,colour) {
+	//set the clicked item to have a border
+	var activeColour = document.getElementsByClassName('ws_colour_selected');
+	if (activeColour.length > 0){
+		Array.each(activeColour, function(el) {
+								var thisId = el.get('id');
+								$(el).set('class','ws_colour_container');
+								});
+	}
+	$(clicked).set('class','ws_colour_selected');
+	
+	//set the image source to the appropriate colour
+	var newImage = webId +'_'+colour;
+	var targetImage = webId +'_detail_image';
+	$(targetImage).set('src','https://info.uwaterloo.ca/waterloostore/images/webstore/product/'+newImage+'.jpg');
+	}
+	
+	
+
+
+//lets the add to cart button interact with munge_quantity properly
+function buyThis (target,setTo){
+	var mvTarget = $(target);
+	mvTarget.set('value',setTo);
+	document.itemSelect.submit();
+	}
+
+
+//INTITIALIZATION	
+
+//waterloo store init functions
+function wstore_init(){
+	addSizeSelect();
+	addViewLarger();
+	}
+
+
+
+//initialize everything we need for page load
+window.addEvent('domready', function() {
+	checkHeaderSearch(); //checks to see the searchbox in the header is set
+    cartToolTip(); //cart tooltip for all pages
+	wstore_init(); //adds page functions for Waterloo Store
+	//bstore_init(); //adds page functions for Book Store
+	payTypes(); //gathers available payment types for checkout page	
+});
+</script>
+
+
+<script type="text/javascript" src="./BookLook -- Course Search results_files/javascript_utility_functions.js"></script>
+<script type="text/javascript" src="./BookLook -- Course Search results_files/uw_design_specific.js"></script>
+
+
+
+
+
+<style type="text/css" media="screen">
+#wrapper {
+    background: #FFF url(https://info.uwaterloo.ca/printondemand/images/POD_Titles_Image_small2.jpg) no-repeat 680px 165px;
+}
+</style>
+
+
+<script type="text/javascript">
+    //initialize everything we need for page load
+    window.addEvent('domready', function() {
+	
+	
+	});
+</script>
+
+
+
+<script type="text/javascript">
+//simple email validation double up for the checkout page
+function checkEmail(email) {
+	var firstEmail = document.checkout.emailv.value;
+	var emailRegxp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+	if (firstEmail != email) {
+		document.checkout.email.value = '';
+		$('emailTypo').set('class','visible');
+	} else {
+		if (emailRegxp.test(email)) {
+			$('emailTypo').set('class','hidden');
+			$('badEmail').set('class','hidden');
+		} else {
+			document.checkout.email.value = '';
+			$('badEmail').set('class','visible');
+		}
+	}
+
+}
+</script>
+
+</head>
+<body>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-889169-16']);
+  _gaq.push(['_setDomainName', 'uwaterloo.ca']);
+  _gaq.push(['_setAllowLinker', true]);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+<div id="shadow">
+<div id="body_wrap">
+<div id="body">
+<div id="sidebar"><img id="wordmark" src="./BookLook -- Course Search results_files/bookstore_wm.png" alt="BookStore" name="wordmark"></div>
+<div id="wrapper">
+<div id="header">
+<div id="header_common"><a href="http://www.retailservices.uwaterloo.ca/hours.html">Hours</a> | <a href="http://www.retailservices.uwaterloo.ca/promotions.html">Promotions</a> | <a href="http://www.retailservices.uwaterloo.ca/rsinsider.html">RS Insider</a></div>
+<div id="search_wrapper">
+	
+    <div id="search_inner">
+    <p id="search_select">
+	<label><input type="radio" name="search_select" class="search_select" onclick="headerSearchSelect(&#39;uwsearch&#39;)">uWaterloo</label>
+	<label><input type="radio" checked="checked" name="search_select" class="search_select" onclick="headerSearchSelect(&#39;storesearch&#39;)" selected="true"> BookLook <span id="search_subtitle">(Author/Title)</span></label>
+    </p>
+    <a id="searchTag" name="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html"></a>
+    <form id="headerSearchSelect" action="">
+	<label for="search submit"><input type="image" id="search_submit" src="./BookLook -- Course Search results_files/search_button.gif"></label>
+	<lebel for="search term"><input type="text" id="searchbox" name="mv_searchspec">
+	<input type="hidden" name="mv_profile" value="search_book">
+
+
+	
+    </lebel></form></div><!-- end #search_inner-->
+    
+	<div id="cart">
+		<a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/ord/basket.html" title="" class="cartDisplay">
+		
+	<img src="./BookLook -- Course Search results_files/cart_blank.gif" alt="Shopping Cart">
+	
+		</a>
+	</div>
+</div><!-- end #search_wrapper" -->
+<div><!-- empty div corrects float/absolute position bug in IE --></div>
+
+	<!-- begin store_links in include/layout -->
+<div id="store_links">
+<ul id="stores_nav">
+    <li><a id="bookstore_nav" href="http://www.bookstore.uwaterloo.ca/"><span class="store_nav_text">BookStore</span></a></li>
+    <li><a id="campustech_nav" href="http://www.campustech.uwaterloo.ca/"><span class="store_nav_text">CampusTech</span></a></li>
+    <li><a id="uprint_nav" href="http://uprint.uwaterloo.ca/"><span class="store_nav_text">uPrint</span></a></li>
+    <li><a id="mediadoc_nav" href="http://www.mediadoc.uwaterloo.ca/"><span class="store_nav_text">Media.doc</span></a></li>
+    <li><a id="waterloostore_nav" href="http://www.waterloostore.uwaterloo.ca/"><span class="store_nav_text">WaterlooStore</span></a></li>
+    <li><a id="writestuff_nav" href="http://www.writestuff.uwaterloo.ca/"><span class="store_nav_text">WriteStuff</span></a></li>
+</ul>
+</div>
+<!-- end store_links in include/layout -->
+
+
+<div id="title_wrapper"><img id="title" src="./BookLook -- Course Search results_files/navtitle_books.jpg" alt="Books" name="title"> <img id="subtitle" src="./BookLook -- Course Search results_files/subnavtitle_booklook.jpg" alt="BookLook" name="subtitle"></div>
+</div>
+	<!-- begin bookstore_nav in include/layout -->
+<div id="navigation">
+<ul class="main_nav">
+  <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search.html#">BOOKS</a>
+      <ul class="sub_nav">
+        <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/index.html">BookLook</a></li>
+	
+	    <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_ondemand.html">Print On Demand (POD) Search</a></li>
+	
+        <li><a href="https://fortuna.uwaterloo.ca/auth-cgi-bin/cgiwrap/rsic/book/search_student.html">My BookLook</a></li>
+	<li><a href="http://www.bookstore.uwaterloo.ca/textrental.html">Text Rental</a></li>
+	<li><a href="http://bookstore.uwaterloo.ca/redeem.html">Redeem In Store Code</a></li>  
+	<li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/architecture.html">Architecture Books</a></li>
+        <li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/optometry.html">Optometry Books</a></li>
+        <li><a href="http://www.bookstore.uwaterloo.ca/special_orders.html">Special Orders</a></li>
+      </ul>
+  </li>
+<li><a href="http://www.bookstore.uwaterloo.ca/accesscodes.html">ACCESS CODES</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/copyrightrules.html">COPYRIGHT RULES</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/courseware/index.php">COURSEWARE</a></li>
+  <li><a href="http://www.printondemand.uwaterloo.ca/home.html">PRINT ON DEMAND</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/linelook.html">LINELOOK</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/author_events.html">AUTHOR EVENTS</a></li>
+  <li><a href="http://www.bookstore.uwaterloo.ca/info_faculty.html">INFO FOR FACULTY</a></li>
+<li><a href="http://www.bookstore.uwaterloo.ca/info_parents.html">INFO FOR PARENTS</a></li>
+<li><a href="http://www.bookstore.uwaterloo.ca/info_firstyear.html">INFO FOR<br>1ST YEAR STUDENTS</a></li>
+<li><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/special/giftcards.html">GIFT CARDS</a></li>
+</ul>
+</div><!-- end #navigation -->
+<!-- end bookstore_nav in include/layout -->
+
+
+
+
+<div id="big_bubble"><img src="./BookLook -- Course Search results_files/bigbubble_frame.png" alt="decorative frame"></div>
+
+
+<div id="content">
+<div id="checkout_link"><a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/ord/basket.html"><img src="./BookLook -- Course Search results_files/check_out.gif" alt="Check Out"></a></div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- end LAYOUT_TOP in regions -->
+
+<!-- BEGIN CONTENT -->
+<!-- END CONTENT -->
+<!-- begin LAYOUT_BOTTOM in regions -->
+
+
+
+
+<!-- BEGIN COMPONENT search_box_course -->
+<div id="search_box_course" class="body_searchbox">
+
+
+<!-- Page Generated Mon Dec 15 09:10:34 2014 -->
+
+ 
+<!-- Department List Generated Mon Dec 15 09:10:34 2014 -->
+<h2>Search By Course:</h2>
+<p><strong>Select the term, department and course to search,
+and click on <em>Add to cart</em> to purchase online</strong></p>
+    <form action="./BookLook -- Course Search results_files/BookLook -- Course Search results.html" method="post">
+	<input type="hidden" name="mv_profile" value="search_course">
+	<p>
+	
+	</p>
+
+	
+	    
+	    
+	    
+	    
+	    
+	
+
+		<table id="course_search">
+		<tbody><tr>
+	   
+		<td> <b>Term:</b></td>
+		<td>
+		    
+		    <select name="mv_searchspec" size="1">
+			
+			    <option value="1151">
+				Winter 2015 (1151)
+			    </option>
+			
+			    <option value="1149" selected="SELECTED">
+				Fall 2014 (1149)
+			    </option>
+			
+			    <option value="1145">
+				Spring 2014 (1145)
+			    </option>
+			
+			    <option value="1141">
+				Winter 2014 (1141)
+			    </option>
+			
+			    <option value="1109">
+				Fall 2010 (1109)
+			    </option>
+			
+			    <option value="1105">
+				Spring 2010 (1105)
+			    </option>
+			
+			    <option value="1101">
+				Winter 2010 (1101)
+			    </option>
+			
+			    <option value="1099">
+				Fall 2009 (1099)
+			    </option>
+			
+			    <option value="1095">
+				Spring 2009 (1095)
+			    </option>
+			
+			    <option value="1091">
+				Winter 2009 (1091)
+			    </option>
+			
+			    <option value="1089">
+				Fall 2008 (1089)
+			    </option>
+			
+			    <option value="1085">
+				Spring 2008 (1085)
+			    </option>
+			
+			    <option value="1081">
+				Winter 2008 (1081)
+			    </option>
+			
+			    <option value="1079">
+				Fall 2007 (1079)
+			    </option>
+			
+			    <option value="1075">
+				Spring 2007 (1075)
+			    </option>
+			
+			    <option value="1071">
+				Winter 2007 (1071)
+			    </option>
+			
+			    <option value="1069">
+				Fall 2006 (1069)
+			    </option>
+			
+			    <option value="1065">
+				Spring 2006 (1065)
+			    </option>
+			
+			    <option value="1061">
+				Winter 2006 (1061)
+			    </option>
+			
+			    <option value="1059">
+				Fall 2005 (1059)
+			    </option>
+			
+			    <option value="1049">
+				Fall 2004 (1049)
+			    </option>
+			
+			</select></td>
+			</tr>
+			<tr>
+		    <td><b>Department:</b></td>
+			<td>
+		    
+		    <select name="mv_searchspec" size="1">
+			<option value="">Select Department</option>
+			
+			    <option value="ACC">ACC</option>
+			
+			    <option value="ACTSC">ACTSC</option>
+			
+			    <option value="AFM">AFM</option>
+			
+			    <option value="AHS">AHS</option>
+			
+			    <option value="AMATH">AMATH</option>
+			
+			    <option value="ANTH">ANTH</option>
+			
+			    <option value="APPLS">APPLS</option>
+			
+			    <option value="ARBUS">ARBUS</option>
+			
+			    <option value="ARCH">ARCH</option>
+			
+			    <option value="ARTS">ARTS</option>
+			
+			    <option value="BASE">BASE</option>
+			
+			    <option value="BE">BE</option>
+			
+			    <option value="BET">BET</option>
+			
+			    <option value="BIOL">BIOL</option>
+			
+			    <option value="BME">BME</option>
+			
+			    <option value="BUS">BUS</option>
+			
+			    <option value="CANC">CANC</option>
+			
+			    <option value="CHE">CHE</option>
+			
+			    <option value="CHEM">CHEM</option>
+			
+			    <option value="CHINA">CHINA</option>
+			
+			    <option value="CIVE">CIVE</option>
+			
+			    <option value="CLAS">CLAS</option>
+			
+			    <option value="CM">CM</option>
+			
+			    <option value="CMW">CMW</option>
+			
+			    <option value="CO">CO</option>
+			
+			    <option value="COGSCI">COGSCI</option>
+			
+			    <option value="COMM">COMM</option>
+			
+			    <option value="CROAT">CROAT</option>
+			
+			    <option value="CS">CS</option>
+			
+			    <option value="CT">CT</option>
+			
+			    <option value="DAC">DAC</option>
+			
+			    <option value="DEI">DEI</option>
+			
+			    <option value="DRAMA">DRAMA</option>
+			
+			    <option value="DUTCH">DUTCH</option>
+			
+			    <option value="EARTH">EARTH</option>
+			
+			    <option value="EASIA">EASIA</option>
+			
+			    <option value="ECE">ECE</option>
+			
+			    <option value="ECON">ECON</option>
+			
+			    <option value="ENBUS">ENBUS</option>
+			
+			    <option value="ENGL">ENGL</option>
+			
+			    <option value="ENVE">ENVE</option>
+			
+			    <option value="ENVS">ENVS</option>
+			
+			    <option value="ERS">ERS</option>
+			
+			    <option value="ESL">ESL</option>
+			
+			    <option value="FINE">FINE</option>
+			
+			    <option value="FR">FR</option>
+			
+			    <option value="GBDA">GBDA</option>
+			
+			    <option value="GEMCC">GEMCC</option>
+			
+			    <option value="GENE">GENE</option>
+			
+			    <option value="GEOE">GEOE</option>
+			
+			    <option value="GEOG">GEOG</option>
+			
+			    <option value="GER">GER</option>
+			
+			    <option value="GERON">GERON</option>
+			
+			    <option value="GGOV">GGOV</option>
+			
+			    <option value="GRK">GRK</option>
+			
+			    <option value="HIST">HIST</option>
+			
+			    <option value="HLTH">HLTH</option>
+			
+			    <option value="HRM">HRM</option>
+			
+			    <option value="HSG">HSG</option>
+			
+			    <option value="HUMSC">HUMSC</option>
+			
+			    <option value="IAIN">IAIN</option>
+			
+			    <option value="INDEV">INDEV</option>
+			
+			    <option value="INTEG">INTEG</option>
+			
+			    <option value="INTST">INTST</option>
+			
+			    <option value="ISS">ISS</option>
+			
+			    <option value="ITAL">ITAL</option>
+			
+			    <option value="ITALST">ITALST</option>
+			
+			    <option value="JAPAN">JAPAN</option>
+			
+			    <option value="JP">JP</option>
+			
+			    <option value="JS">JS</option>
+			
+			    <option value="KIN">KIN</option>
+			
+			    <option value="KOREA">KOREA</option>
+			
+			    <option value="LAT">LAT</option>
+			
+			    <option value="LED">LED</option>
+			
+			    <option value="LS">LS</option>
+			
+			    <option value="MATBUS">MATBUS</option>
+			
+			    <option value="MATH">MATH</option>
+			
+			    <option value="MCT">MCT</option>
+			
+			    <option value="ME">ME</option>
+			
+			    <option value="MEDVL">MEDVL</option>
+			
+			    <option value="MNS">MNS</option>
+			
+			    <option value="MSCI">MSCI</option>
+			
+			    <option value="MTE">MTE</option>
+			
+			    <option value="MTHEL">MTHEL</option>
+			
+			    <option value="MUSIC">MUSIC</option>
+			
+			    <option value="NE">NE</option>
+			
+			    <option value="OPTOM">OPTOM</option>
+			
+			    <option value="PACS">PACS</option>
+			
+			    <option value="PHARM">PHARM</option>
+			
+			    <option value="PHIL">PHIL</option>
+			
+			    <option value="PHS">PHS</option>
+			
+			    <option value="PHYS">PHYS</option>
+			
+			    <option value="PLAN">PLAN</option>
+			
+			    <option value="PMATH">PMATH</option>
+			
+			    <option value="PORT">PORT</option>
+			
+			    <option value="PS">PS</option>
+			
+			    <option value="PSCI">PSCI</option>
+			
+			    <option value="PSYCH">PSYCH</option>
+			
+			    <option value="REC">REC</option>
+			
+			    <option value="REES">REES</option>
+			
+			    <option value="RS">RS</option>
+			
+			    <option value="RUSS">RUSS</option>
+			
+			    <option value="SCBUS">SCBUS</option>
+			
+			    <option value="SCI">SCI</option>
+			
+			    <option value="SDS">SDS</option>
+			
+			    <option value="SE">SE</option>
+			
+			    <option value="SI">SI</option>
+			
+			    <option value="SMF">SMF</option>
+			
+			    <option value="SOC">SOC</option>
+			
+			    <option value="SOCWK">SOCWK</option>
+			
+			    <option value="SPAN">SPAN</option>
+			
+			    <option value="SPCOM">SPCOM</option>
+			
+			    <option value="SPD">SPD</option>
+			
+			    <option value="STAT">STAT</option>
+			
+			    <option value="STV">STV</option>
+			
+			    <option value="SUSM">SUSM</option>
+			
+			    <option value="SWK">SWK</option>
+			
+			    <option value="SWREN">SWREN</option>
+			
+			    <option value="SYDE">SYDE</option>
+			
+			    <option value="TOUR">TOUR</option>
+			
+			    <option value="TS">TS</option>
+			
+			    <option value="UNIV">UNIV</option>
+			
+			    <option value="VCULT">VCULT</option>
+			
+			    <option value="WS">WS</option>
+			
+		    </select></td>
+		</tr>
+		<tr>
+			
+		   <td> <b>Course:</b></td>
+		   <td><input maxlength="5" size="5" name="mv_searchspec" type="text" value=""></td>
+		</tr><tr>
+                   <td>Section (Optional):</td>
+		   <td><input maxlength="3" size="3" name="mv_searchspec" type="text" value=""></td>
+                </tr>
+		<tr>   
+		   <td>Instructor (Optional):</td>
+		   <td><input maxlength="20" size="20" name="mv_searchspec" type="text" value=""></td>
+		</tr>
+		</tbody></table>
+		    <input type="submit" value="SEARCH" class="search_button">
+    </form>
+
+    <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_book.html">Author/Title Search</a>
+    | <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/search_advanced.html">Advanced Search</a>
+
+
+</div><!--end #search_box_course -->
+<!-- END COMPONENT search_box_course -->
+
+
+
+
+<!-- BEGIN COMPONENT results_courses -->
+
+	
+<!-- begin munge_quantity in include/javascript -->
+	
+
+	
+
+	
+
+
+
+<style type="text/css">
+    .no_image_biblioshare {
+	background: url("") no-repeat scroll center center transparent;
+	color: #999999;    display: block;    height: 120px;
+	margin-left: 10px;
+	width: 100px;
+    }
+</style>
+
+
+			
+
+    
+
+ 
+    
+	<center>
+          
+                Matches 1-10 of 3005 courses found.
+          
+	  <br>      
+	  <strong>1</strong> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:10:19:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">2</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:20:29:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">3</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:30:39:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">4</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:40:49:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">5</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:50:59:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">6</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:60:69:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">7</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:70:79:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">8</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:80:89:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">9</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:90:99:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">10</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:100:109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">11</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:110:119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">12</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:120:129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">13</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:130:139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">14</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:140:149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">15</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:150:159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">16</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:160:169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">17</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:170:179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">18</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:180:189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">19</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:190:199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">20</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:200:209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">21</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:210:219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">22</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:220:229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">23</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:230:239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">24</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:240:249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">25</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:250:259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">26</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:260:269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">27</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:270:279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">28</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:280:289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">29</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:290:299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">30</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:300:309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">31</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:310:319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">32</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:320:329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">33</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:330:339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">34</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:340:349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">35</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:350:359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">36</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:360:369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">37</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:370:379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">38</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:380:389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">39</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:390:399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">40</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:400:409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">41</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:410:419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">42</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:420:429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">43</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:430:439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">44</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:440:449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">45</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:450:459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">46</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:460:469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">47</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:470:479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">48</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:480:489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">49</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:490:499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">50</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:500:509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">51</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:510:519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">52</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:520:529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">53</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:530:539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">54</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:540:549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">55</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:550:559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">56</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:560:569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">57</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:570:579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">58</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:580:589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">59</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:590:599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">60</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:600:609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">61</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:610:619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">62</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:620:629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">63</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:630:639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">64</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:640:649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">65</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:650:659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">66</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:660:669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">67</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:670:679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">68</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:680:689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">69</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:690:699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">70</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:700:709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">71</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:710:719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">72</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:720:729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">73</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:730:739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">74</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:740:749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">75</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:750:759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">76</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:760:769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">77</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:770:779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">78</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:780:789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">79</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:790:799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">80</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:800:809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">81</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:810:819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">82</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:820:829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">83</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:830:839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">84</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:840:849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">85</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:850:859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">86</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:860:869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">87</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:870:879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">88</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:880:889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">89</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:890:899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">90</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:900:909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">91</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:910:919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">92</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:920:929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">93</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:930:939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">94</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:940:949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">95</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:950:959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">96</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:960:969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">97</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:970:979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">98</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:980:989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">99</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:990:999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">100</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1000:1009:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">101</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1010:1019:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">102</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1020:1029:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">103</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1030:1039:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">104</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1040:1049:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">105</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1050:1059:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">106</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1060:1069:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">107</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1070:1079:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">108</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1080:1089:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">109</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1090:1099:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">110</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1100:1109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">111</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1110:1119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">112</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1120:1129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">113</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1130:1139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">114</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1140:1149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">115</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1150:1159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">116</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1160:1169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">117</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1170:1179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">118</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1180:1189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">119</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1190:1199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">120</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1200:1209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">121</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1210:1219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">122</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1220:1229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">123</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1230:1239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">124</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1240:1249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">125</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1250:1259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">126</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1260:1269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">127</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1270:1279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">128</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1280:1289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">129</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1290:1299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">130</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1300:1309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">131</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1310:1319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">132</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1320:1329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">133</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1330:1339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">134</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1340:1349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">135</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1350:1359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">136</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1360:1369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">137</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1370:1379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">138</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1380:1389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">139</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1390:1399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">140</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1400:1409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">141</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1410:1419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">142</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1420:1429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">143</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1430:1439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">144</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1440:1449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">145</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1450:1459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">146</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1460:1469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">147</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1470:1479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">148</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1480:1489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">149</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1490:1499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">150</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1500:1509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">151</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1510:1519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">152</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1520:1529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">153</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1530:1539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">154</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1540:1549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">155</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1550:1559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">156</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1560:1569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">157</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1570:1579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">158</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1580:1589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">159</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1590:1599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">160</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1600:1609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">161</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1610:1619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">162</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1620:1629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">163</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1630:1639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">164</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1640:1649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">165</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1650:1659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">166</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1660:1669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">167</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1670:1679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">168</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1680:1689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">169</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1690:1699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">170</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1700:1709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">171</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1710:1719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">172</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1720:1729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">173</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1730:1739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">174</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1740:1749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">175</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1750:1759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">176</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1760:1769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">177</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1770:1779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">178</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1780:1789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">179</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1790:1799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">180</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1800:1809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">181</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1810:1819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">182</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1820:1829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">183</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1830:1839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">184</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1840:1849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">185</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1850:1859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">186</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1860:1869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">187</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1870:1879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">188</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1880:1889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">189</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1890:1899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">190</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1900:1909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">191</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1910:1919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">192</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1920:1929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">193</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1930:1939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">194</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1940:1949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">195</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1950:1959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">196</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1960:1969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">197</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1970:1979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">198</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1980:1989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">199</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1990:1999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">200</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2000:2009:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">201</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2010:2019:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">202</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2020:2029:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">203</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2030:2039:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">204</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2040:2049:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">205</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2050:2059:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">206</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2060:2069:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">207</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2070:2079:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">208</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2080:2089:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">209</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2090:2099:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">210</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2100:2109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">211</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2110:2119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">212</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2120:2129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">213</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2130:2139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">214</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2140:2149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">215</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2150:2159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">216</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2160:2169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">217</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2170:2179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">218</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2180:2189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">219</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2190:2199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">220</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2200:2209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">221</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2210:2219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">222</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2220:2229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">223</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2230:2239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">224</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2240:2249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">225</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2250:2259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">226</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2260:2269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">227</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2270:2279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">228</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2280:2289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">229</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2290:2299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">230</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2300:2309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">231</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2310:2319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">232</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2320:2329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">233</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2330:2339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">234</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2340:2349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">235</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2350:2359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">236</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2360:2369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">237</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2370:2379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">238</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2380:2389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">239</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2390:2399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">240</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2400:2409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">241</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2410:2419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">242</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2420:2429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">243</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2430:2439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">244</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2440:2449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">245</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2450:2459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">246</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2460:2469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">247</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2470:2479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">248</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2480:2489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">249</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2490:2499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">250</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2500:2509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">251</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2510:2519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">252</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2520:2529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">253</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2530:2539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">254</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2540:2549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">255</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2550:2559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">256</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2560:2569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">257</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2570:2579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">258</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2580:2589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">259</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2590:2599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">260</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2600:2609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">261</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2610:2619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">262</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2620:2629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">263</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2630:2639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">264</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2640:2649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">265</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2650:2659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">266</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2660:2669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">267</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2670:2679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">268</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2680:2689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">269</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2690:2699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">270</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2700:2709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">271</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2710:2719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">272</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2720:2729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">273</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2730:2739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">274</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2740:2749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">275</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2750:2759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">276</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2760:2769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">277</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2770:2779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">278</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2780:2789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">279</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2790:2799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">280</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2800:2809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">281</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2810:2819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">282</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2820:2829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">283</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2830:2839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">284</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2840:2849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">285</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2850:2859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">286</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2860:2869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">287</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2870:2879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">288</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2880:2889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">289</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2890:2899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">290</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2900:2909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">291</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2910:2919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">292</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2920:2929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">293</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2930:2939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">294</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2940:2949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">295</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2950:2959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">296</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2960:2969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">297</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2970:2979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">298</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2980:2989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">299</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2990:2999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">300</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:3000:3004:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">301</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:10:19:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">Next</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:3000:3004:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">Last</a>
+      	<hr>
+      </center>
+   
+
+   
+   
+       
+   
+
+	    
+	<form name="courseSubmit" action="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/nothing.html" method="POST">
+	    <input type="hidden" name="mv_session_id" value="sjeA6Kgn">
+	    <input type="hidden" name="mv_action" value="refresh">
+	    <input type="hidden" name="mv_click" value="munge_quantity">	
+	    <input type="hidden" name="first_match" value="">
+
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACC
+				770
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+		   <div class="book_subsection">
+		    <h2>Section: 
+		    
+   		    001 Li,Bin</h2>
+			<input type="image" class="add_all_cart" src="./BookLook -- Course Search results_files/add_all_cart.gif" alt="Add all items for this course" onclick="addAllCourse(&#39;1149ACC770001&#39;);">
+                    
+                    <input type="hidden" name="mv_separate_items" value="0">
+                    <input type="hidden" name="mv_order_item" value="TX.9780387249681">
+                    <input type="hidden" name="mv_order_orderline_term" value="1149">
+                    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+                    <input type="hidden" name="mv_order_orderline_course" value="770">
+                    <input type="hidden" name="mv_order_orderline_section" value="001">
+                    <input type="hidden" name="mv_order_orderline_instructor" value="Li,Bin">
+                    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+                    <input type="hidden" name="mv_oi1" value="">
+                    <input class="1149ACC770001" type="hidden" name="mv_order_quantity" size="2" value="">
+                    
+                    <input type="hidden" name="mv_separate_items" value="0">
+                    <input type="hidden" name="mv_order_item" value="TX.9780387401010">
+                    <input type="hidden" name="mv_order_orderline_term" value="1149">
+                    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+                    <input type="hidden" name="mv_order_orderline_course" value="770">
+                    <input type="hidden" name="mv_order_orderline_section" value="001">
+                    <input type="hidden" name="mv_order_orderline_instructor" value="Li,Bin">
+                    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+                    <input type="hidden" name="mv_oi2" value="">
+                    <input class="1149ACC770001" type="hidden" name="mv_order_quantity" size="2" value="">
+                    
+
+		</div>
+		    
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9780387249681">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi3.value=&#39;TX.9780387249681&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">SHREVE S E</span>:<span class="title">STOCHASTIC CALCULUS FOR FINANCE 1</span></p>
+       <p><span class="sku">SKU: 9780387249681</span></p>
+       
+       <p><span class="price">Price: 62.00</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				5
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+    <input type="hidden" name="mv_order_orderline_course" value="770">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Li,Bin">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi3" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=STOCHASTIC%20CALCULUS%20FOR%20FINANCE%201&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780387249681&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9780387401010">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi4.value=&#39;TX.9780387401010&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">SHREVE</span>:<span class="title">STOCHASTIC CALCULUS FOR FINANCE II</span></p>
+       <p><span class="sku">SKU: 9780387401010</span></p>
+       
+       <p><span class="price">Price: 85.50</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				2
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+    <input type="hidden" name="mv_order_orderline_course" value="770">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Li,Bin">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi4" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=STOCHASTIC%20CALCULUS%20FOR%20FINANCE%20II&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780387401010&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACC
+				781
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9780226484778">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi5.value=&#39;TX.9780226484778&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">LIPSON</span>:<span class="title">DOING HONEST WORK IN COLLEGE 2ND ED</span></p>
+       <p><span class="sku">SKU: 9780226484778</span></p>
+       
+       <p><span class="price">Price: 16.10</span></p>
+       <p><span class="stock">Estimated Copies Available:0</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+    <input type="hidden" name="mv_order_orderline_course" value="781">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="O&#39;Brien,Patricia">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi5" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=DOING%20HONEST%20WORK%20IN%20COLLEGE%202ND%20ED&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780226484778&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9780395615560">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi6.value=&#39;TX.9780395615560&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">SHADISH ET AL</span>:<span class="title">EXPERIMENTAL &amp; QUASI-EXPERIMENTAL DESIGNS 2ED</span></p>
+       <p><span class="sku">SKU: 9780395615560</span></p>
+       
+       <p><span class="price">Price: 177.95</span></p>
+       <p><span class="stock">Estimated Copies Available:0</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+    <input type="hidden" name="mv_order_orderline_course" value="781">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="O&#39;Brien,Patricia">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi6" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=EXPERIMENTAL%20&%20QUASI-EXPERIMENTAL%20DESIGNS%202ED&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780395615560&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9781592602919">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi7.value=&#39;TX.9781592602919&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;">Optional Item</span></p> 
+				
+				
+					<p><span class="author">TROCHIM &amp; DONNELLY</span>:<span class="title">RESEARCH METHODS KNOWLEDGE BASE 3ED</span></p>
+       <p><span class="sku">SKU: 9781592602919</span></p>
+       
+       <p><span class="price">Price: 162.95</span></p>
+       <p><span class="stock">Estimated Copies Available:0</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACC">
+    <input type="hidden" name="mv_order_orderline_course" value="781">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="O&#39;Brien,Patricia">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="O">
+    <input type="hidden" name="mv_oi7" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=RESEARCH%20METHODS%20KNOWLEDGE%20BASE%203ED&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781592602919&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACTSC
+				221
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9780070000186">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi8.value=&#39;TX.9780070000186&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">BROWN ET AL</span>:<span class="title">MATHEMATICS OF FINANCE 7ED</span></p>
+       <p><span class="sku">SKU: 9780070000186</span></p>
+       
+       <p><span class="price">Price: 127.95</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				1
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACTSC">
+    <input type="hidden" name="mv_order_orderline_course" value="221">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Blake,William Peter">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi8" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=MATHEMATICS%20OF%20FINANCE%207ED&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9780070000186&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACTSC
+				231
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9781259033803">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/9781259033803.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi9.value=&#39;TX.9781259033803&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">BROWN &amp; KOPP</span>:<span class="title">FINANCIAL MATHEMATICS: THEORY &amp; PRACTICE</span></p>
+       <p><span class="sku">SKU: 9781259033803</span></p>
+       
+       <p><span class="price">Price: 87.95</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				121
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACTSC">
+    <input type="hidden" name="mv_order_orderline_course" value="231">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Freeland,R Keith">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi9" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=FINANCIAL%20MATHEMATICS:%20THEORY%20&%20PRACTICE&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781259033803&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACTSC
+				232
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9781107044074">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi10.value=&#39;TX.9781107044074&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">DICKSON ET AL</span>:<span class="title">ACTUARIAL MATHEMATICS FOR LIFE CONTINGENT RISKS 2ND</span></p>
+       <p><span class="sku">SKU: 9781107044074</span></p>
+       
+       <p><span class="price">Price: 92.95</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				38
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACTSC">
+    <input type="hidden" name="mv_order_orderline_course" value="232">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Adcock,James">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi10" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=ACTUARIAL%20MATHEMATICS%20FOR%20LIFE%20CONTINGENT%20RISKS%202ND&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781107044074&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9781107620261">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi11.value=&#39;TX.9781107620261&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">DICKSON ET AL</span>:<span class="title">SOLUTIONS MANUAL FOR 2ED OF ACTUARIAL MATHEMATICS FOR LIFE CONTINGENT RISKS 2ED</span></p>
+       <p><span class="sku">SKU: 9781107620261</span></p>
+       
+       <p><span class="price">Price: 34.95</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				41
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACTSC">
+    <input type="hidden" name="mv_order_orderline_course" value="232">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Adcock,James">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi11" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=SOLUTIONS%20MANUAL%20FOR%202ED%20OF%20ACTUARIAL%20MATHEMATICS%20FOR%20LIFE%20CONTINGENT%20RISKS%202ED&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781107620261&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		
+			<div>
+			<h1 class="book_section">
+				ACTSC
+				331
+				- Fall 2014 (1149)
+			    </h1>
+			</div>
+		
+
+		
+
+		
+		    
+
+
+ 
+	 <input type="hidden" name="mv_order_mv_order_route" value="">
+     
+	 <input type="hidden" name="mv_order_item" value="TX.9781107044074">
+      
+ 
+
+ 
+      
+ 
+
+	    <div class="book_item">
+		<div class="book_image">
+		<span class="no_image_biblioshare">
+		    
+			    <img class="cover" src="./BookLook -- Course Search results_files/biblioshare_no_image_available.jpg" alt="">
+			
+		</span>
+		 
+	         
+		    
+			    <br><input type="button" value="Add To Cart" alt="Add To Cart" onclick="this.form.mv_oi12.value=&#39;TX.9781107044074&#39;;this.form.submit()" class="add_cart">
+			
+		
+		 
+
+ 
+      
+ 
+
+</div>
+		<div class="book_info">			
+	    <p><span style="font-weight: bold;color:#ff0000;">Required Item</span></p> 
+				
+				
+					<p><span class="author">DICKSON ET AL</span>:<span class="title">ACTUARIAL MATHEMATICS FOR LIFE CONTINGENT RISKS 2ND</span></p>
+       <p><span class="sku">SKU: 9781107044074</span></p>
+       
+       <p><span class="price">Price: 92.95</span></p>
+       <p><span class="stock">Estimated Copies Available:
+				38
+				</span></p>
+	 
+
+ 
+      
+ 
+
+
+
+
+    <input type="hidden" name="mv_separate_items" value="0">
+    <input type="hidden" name="mv_order_orderline_term" value="1149">
+    <input type="hidden" name="mv_order_orderline_department" value="ACTSC">
+    <input type="hidden" name="mv_order_orderline_course" value="331">
+    <input type="hidden" name="mv_order_orderline_section" value="001">
+    <input type="hidden" name="mv_order_orderline_instructor" value="Hardy,Mary R">
+    <input type="hidden" name="mv_order_orderline_reqopt" value="R">
+    <input type="hidden" name="mv_oi12" value="">
+    <input type="hidden" name="mv_order_quantity" size="2" value="">
+
+	
+ <p>Search for this item at the Library:<br> <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=ACTUARIAL%20MATHEMATICS%20FOR%20LIFE%20CONTINGENT%20RISKS%202ND&fn=search&mode=Basic">Title Search</a> | <a href="http://primo.tug-libraries.on.ca:1701/primo_library/libweb/action/search.do?frbg=&dum=true&vl%281UI0%29=contains&vid=WATERLOO&vl%28248021325UI1%29=all_items&vl%287254372UI0%29=any&srt=rank&indx=1&tab=default_tab&doc=vtug1024210&ct=search&scp.scps=&vl%28freeText0%29=9781107044074&fn=search&mode=Basic">ISBN Search</a></p>
+		</div><!-- end .book_info -->
+		<hr class="item_break">
+		</div><!-- end .book_item -->
+	
+	    
+		   
+	    
+	</form>
+    
+    <center>
+
+    
+	<hr>
+	<blockquote>
+	    
+		Matches 1-10 of 3005 found.
+	    
+	    <br>
+	    <strong>1</strong> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:10:19:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">2</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:20:29:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">3</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:30:39:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">4</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:40:49:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">5</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:50:59:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">6</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:60:69:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">7</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:70:79:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">8</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:80:89:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">9</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:90:99:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">10</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:100:109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">11</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:110:119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">12</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:120:129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">13</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:130:139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">14</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:140:149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">15</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:150:159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">16</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:160:169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">17</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:170:179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">18</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:180:189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">19</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:190:199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">20</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:200:209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">21</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:210:219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">22</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:220:229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">23</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:230:239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">24</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:240:249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">25</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:250:259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">26</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:260:269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">27</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:270:279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">28</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:280:289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">29</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:290:299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">30</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:300:309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">31</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:310:319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">32</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:320:329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">33</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:330:339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">34</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:340:349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">35</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:350:359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">36</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:360:369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">37</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:370:379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">38</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:380:389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">39</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:390:399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">40</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:400:409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">41</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:410:419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">42</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:420:429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">43</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:430:439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">44</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:440:449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">45</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:450:459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">46</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:460:469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">47</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:470:479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">48</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:480:489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">49</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:490:499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">50</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:500:509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">51</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:510:519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">52</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:520:529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">53</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:530:539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">54</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:540:549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">55</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:550:559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">56</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:560:569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">57</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:570:579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">58</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:580:589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">59</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:590:599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">60</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:600:609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">61</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:610:619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">62</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:620:629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">63</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:630:639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">64</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:640:649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">65</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:650:659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">66</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:660:669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">67</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:670:679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">68</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:680:689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">69</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:690:699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">70</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:700:709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">71</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:710:719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">72</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:720:729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">73</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:730:739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">74</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:740:749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">75</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:750:759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">76</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:760:769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">77</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:770:779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">78</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:780:789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">79</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:790:799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">80</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:800:809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">81</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:810:819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">82</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:820:829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">83</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:830:839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">84</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:840:849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">85</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:850:859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">86</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:860:869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">87</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:870:879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">88</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:880:889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">89</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:890:899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">90</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:900:909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">91</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:910:919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">92</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:920:929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">93</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:930:939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">94</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:940:949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">95</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:950:959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">96</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:960:969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">97</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:970:979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">98</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:980:989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">99</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:990:999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">100</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1000:1009:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">101</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1010:1019:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">102</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1020:1029:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">103</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1030:1039:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">104</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1040:1049:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">105</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1050:1059:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">106</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1060:1069:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">107</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1070:1079:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">108</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1080:1089:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">109</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1090:1099:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">110</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1100:1109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">111</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1110:1119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">112</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1120:1129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">113</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1130:1139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">114</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1140:1149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">115</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1150:1159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">116</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1160:1169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">117</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1170:1179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">118</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1180:1189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">119</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1190:1199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">120</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1200:1209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">121</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1210:1219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">122</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1220:1229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">123</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1230:1239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">124</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1240:1249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">125</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1250:1259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">126</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1260:1269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">127</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1270:1279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">128</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1280:1289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">129</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1290:1299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">130</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1300:1309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">131</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1310:1319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">132</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1320:1329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">133</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1330:1339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">134</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1340:1349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">135</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1350:1359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">136</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1360:1369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">137</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1370:1379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">138</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1380:1389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">139</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1390:1399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">140</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1400:1409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">141</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1410:1419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">142</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1420:1429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">143</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1430:1439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">144</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1440:1449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">145</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1450:1459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">146</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1460:1469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">147</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1470:1479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">148</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1480:1489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">149</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1490:1499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">150</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1500:1509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">151</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1510:1519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">152</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1520:1529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">153</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1530:1539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">154</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1540:1549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">155</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1550:1559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">156</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1560:1569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">157</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1570:1579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">158</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1580:1589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">159</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1590:1599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">160</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1600:1609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">161</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1610:1619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">162</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1620:1629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">163</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1630:1639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">164</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1640:1649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">165</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1650:1659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">166</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1660:1669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">167</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1670:1679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">168</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1680:1689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">169</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1690:1699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">170</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1700:1709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">171</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1710:1719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">172</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1720:1729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">173</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1730:1739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">174</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1740:1749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">175</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1750:1759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">176</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1760:1769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">177</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1770:1779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">178</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1780:1789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">179</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1790:1799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">180</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1800:1809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">181</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1810:1819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">182</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1820:1829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">183</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1830:1839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">184</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1840:1849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">185</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1850:1859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">186</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1860:1869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">187</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1870:1879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">188</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1880:1889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">189</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1890:1899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">190</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1900:1909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">191</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1910:1919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">192</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1920:1929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">193</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1930:1939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">194</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1940:1949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">195</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1950:1959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">196</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1960:1969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">197</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1970:1979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">198</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1980:1989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">199</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:1990:1999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">200</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2000:2009:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">201</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2010:2019:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">202</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2020:2029:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">203</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2030:2039:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">204</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2040:2049:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">205</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2050:2059:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">206</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2060:2069:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">207</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2070:2079:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">208</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2080:2089:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">209</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2090:2099:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">210</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2100:2109:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">211</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2110:2119:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">212</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2120:2129:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">213</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2130:2139:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">214</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2140:2149:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">215</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2150:2159:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">216</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2160:2169:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">217</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2170:2179:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">218</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2180:2189:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">219</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2190:2199:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">220</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2200:2209:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">221</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2210:2219:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">222</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2220:2229:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">223</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2230:2239:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">224</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2240:2249:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">225</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2250:2259:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">226</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2260:2269:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">227</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2270:2279:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">228</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2280:2289:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">229</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2290:2299:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">230</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2300:2309:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">231</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2310:2319:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">232</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2320:2329:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">233</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2330:2339:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">234</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2340:2349:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">235</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2350:2359:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">236</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2360:2369:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">237</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2370:2379:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">238</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2380:2389:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">239</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2390:2399:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">240</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2400:2409:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">241</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2410:2419:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">242</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2420:2429:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">243</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2430:2439:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">244</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2440:2449:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">245</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2450:2459:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">246</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2460:2469:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">247</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2470:2479:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">248</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2480:2489:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">249</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2490:2499:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">250</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2500:2509:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">251</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2510:2519:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">252</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2520:2529:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">253</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2530:2539:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">254</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2540:2549:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">255</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2550:2559:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">256</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2560:2569:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">257</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2570:2579:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">258</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2580:2589:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">259</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2590:2599:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">260</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2600:2609:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">261</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2610:2619:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">262</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2620:2629:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">263</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2630:2639:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">264</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2640:2649:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">265</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2650:2659:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">266</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2660:2669:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">267</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2670:2679:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">268</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2680:2689:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">269</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2690:2699:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">270</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2700:2709:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">271</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2710:2719:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">272</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2720:2729:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">273</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2730:2739:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">274</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2740:2749:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">275</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2750:2759:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">276</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2760:2769:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">277</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2770:2779:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">278</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2780:2789:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">279</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2790:2799:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">280</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2800:2809:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">281</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2810:2819:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">282</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2820:2829:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">283</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2830:2839:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">284</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2840:2849:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">285</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2850:2859:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">286</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2860:2869:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">287</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2870:2879:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">288</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2880:2889:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">289</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2890:2899:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">290</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2900:2909:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">291</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2910:2919:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">292</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2920:2929:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">293</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2930:2939:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">294</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2940:2949:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">295</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2950:2959:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">296</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2960:2969:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">297</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2970:2979:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">298</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2980:2989:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">299</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:2990:2999:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">300</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:3000:3004:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">301</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:10:19:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">Next</a> <a href="https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book/scan/MM=eddf1b90bc5443bb65d1a1ee1e9b9810:3000:3004:10.html?mv_more_ip=1&mv_nextpage=results_courses%2ehtml&mv_arg=">Last</a>
+	    <br>
+	</blockquote>
+    
+</center>
+
+<br>
+
+<!-- END COMPONENT results_courses -->
+
+
+
+
+
+
+</div><!-- end #content -->
+</div><!-- end #wrapper -->
+
+<div id="pagepin">
+<div id="footer"><a href="http://www.uwaterloo.ca/"><img id="uWaterloo_wordmark" src="./BookLook -- Course Search results_files/uWaterloo_wordmark.gif" alt="University of Waterloo" name="uWaterloo_wordmark"></a>
+<p><span id=" common"><a href="http://www.retailservices.uwaterloo.ca/contact.html">Contact Us</a> | <a href="http://www.uwaterloo.ca/privacy/">Privacy Policy</a> | <a href="http://www.retailservices.uwaterloo.ca/refund_faq.html">Refund Policy &amp; FAQ</a> | <a href="http://www.retailservices.uwaterloo.ca/student_employment.html">Student Employment</a> | <a href="http://www.retailservices.uwaterloo.ca/green/">Green Initiatives</a></span></p>
+<p><span id="address">200 University Avenue West, Waterloo, Ontario, Canada N2L 3G1</span> | <span id="phone">519 888 4673</span></p>
+<p id="web_address"><a href="http://www.retailservices.uwaterloo.ca/">www.retailservices.uwaterloo.ca</a></p>
+</div><!-- end #footer -->
+
+</div><!-- end #pagepin -->
+
+</div><!-- end #body -->
+</div><!-- end #body_wrap -->
+</div><!-- end #shadow -->
+
+
+
+
+</body></html>
