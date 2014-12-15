@@ -21,13 +21,12 @@ class Crawler
     @root_page = @agent.submit(target_form) # first page of results
   end
 
-  def start_scrape!(link, thread_name)
+  def get_page(link, thread_name)
     attempt = 1
     attempt_max = 5
     while attempt <= attempt_max do
       begin
         page = @agent.get(link.href)
-        result = Scraper.scrape_page page
         break
       rescue Mechanize::ResponseCodeError => exception
         if exception.response_code == '500'
@@ -40,7 +39,7 @@ class Crawler
       end
     end
     raise "Over #{attempt_max} attempts made for #{link.href}, exiting" if attempt > attempt_max
-    return result
+    return page
   end
 
   def crawl!
@@ -48,17 +47,12 @@ class Crawler
     links = @root_page.links_with(href: /book\/scan/).uniq { |link| link.href }
 
     threads = []
-    num_threads = 0
+    num_threads = 1
 
     books = Queue.new
 
     threads << Thread.new do
-
-      Scraper.scrape_page(@root_page).each do |book|
-        books << book
-      end
-
-      num_threads += 1
+      add_books(books, @root_page)
     end
 
     # for now, scrape only 10 links (2 slices of 5)
@@ -66,17 +60,15 @@ class Crawler
       slice.each do |link|
         threads << Thread.new do
           num_threads += 1;
-
-          start_scrape!(link, "Thread ##{num_threads}").each do |book|
-            books << book
-          end
-
+          document = get_page(link, "Thread ##{num_threads}")
+          add_books(books, document)
         end
       end
       print_verbose "Scraping #{slice.size} links asynchronously"
       threads.each { |thr| thr.join }
       print_verbose "Done scraping that set"
     end
+
     # save all this data
     write_DB!(books)
   end # end crawl! function
@@ -85,6 +77,12 @@ class Crawler
   private
   def print_verbose(string)
     print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if VERBOSE
+  end
+
+  def add_books(books, document)
+    Scraper.scrape_page(document).each do |book|
+      books << book
+    end
   end
 
   def write_DB!(records)
