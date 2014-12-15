@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  author: MyString
+  title: MyString
+  sku: 1
+  price: 1.5
+  stock: 1
+  term: 1
+  department: MyString
+  course: MyString
+  section: 1
+  instructor: MyString
+  reqopt: false
+
+two:
+  author: MyString
+  title: MyString
+  sku: 1
+  price: 1.5
+  stock: 1
+  term: 1
+  department: MyString
+  course: MyString
+  section: 1
+  instructor: MyString
+  reqopt: false
