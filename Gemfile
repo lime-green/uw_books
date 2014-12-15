@@ -14,6 +14,7 @@ gem 'bootstrap-sass',       '3.2.0.2'
 gem 'will_paginate'
 gem 'bootstrap-will_paginate'
 gem 'mechanize'
+gem 'factory_girl_rails'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'
