@@ -3,19 +3,21 @@ class Crawler
   require 'mechanize'
   require 'net/http'
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
+  CURRENT_TERM = "1149" # calculate this?
+
+  VERBOSE = true        # useful messages
+
+  SLICE_MAX = 5         # crawl this amount of links asynchronously
+  RETRY_DELAY = 10      # sleep for this amount of seconds after a failed request
 
   def initialize
-    @current_term = "1149" # calculate this?
-    @verbose = true        # useful messages
-    @slice_max = 5         # crawl this amount of links asynchronously
-    @retry_delay = 10      # sleep for this amount of seconds after a failed request
 
     # Prepare page
     @agent = Mechanize.new
     @root_page = @agent.get(ROOT_URL)
     target_form = @root_page.at('div#search_box_course form') # Nokogiri object
     target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
-    target_form.field_with(value: /[0-9]{4}/).option_with(value: @current_term).click # Select the term
+    target_form.field_with(value: /[0-9]{4}/).option_with(value: CURRENT_TERM).click # Select the term
     @root_page = @agent.submit(target_form) # first page of results
   end
 
@@ -29,9 +31,9 @@ class Crawler
         break
       rescue Mechanize::ResponseCodeError => exception
         if exception.response_code == '500'
-          print_verbose "HTTPInternalServerError in #{thread_name}: will try again in #{@retry_delay} seconds (attempt #{attempt})"
+          print_verbose "HTTPInternalServerError in #{thread_name}: will try again in #{RETRY_DELAY} seconds (attempt #{attempt})"
           attempt += 1
-          sleep @retry_delay
+          sleep RETRY_DELAY
         else
           raise
         end
@@ -60,7 +62,7 @@ class Crawler
     end
 
     # for now, scrape only 10 links (2 slices of 5)
-    links.take(10).each_slice(@slice_max) do |slice|
+    links.take(10).each_slice(SLICE_MAX) do |slice|
       slice.each do |link|
         threads << Thread.new do
           num_threads += 1;
@@ -82,7 +84,7 @@ class Crawler
   # ALL PRIVATE FUNCTIONS FOLLOW
   private
   def print_verbose(string)
-    print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if @verbose
+    print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if VERBOSE
   end
 
   def write_DB!(records)
