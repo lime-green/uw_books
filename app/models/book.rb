@@ -14,5 +14,5 @@ class Book < ActiveRecord::Base
   validates :course,  presence: true, allow_bank: false, length: { in: 3..4 }
 
   # boolean validations
-  validates :reqopt, presence: true
+  validates :reqopt, inclusion: [true, false]
 end

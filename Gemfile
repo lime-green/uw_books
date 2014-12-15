@@ -14,15 +14,14 @@ gem 'bootstrap-sass',       '3.2.0.2'
 gem 'will_paginate'
 gem 'bootstrap-will_paginate'
 gem 'mechanize'
-gem 'factory_girl_rails'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'
   gem 'byebug', '3.4.1'
   gem 'web-console', '2.0.0.beta3'
   gem 'spring',      '1.1.3'
-  gem 'rspec'
   gem 'rspec-rails'
+  gem 'faker'
   gem 'factory_girl_rails'
 end
 
