@@ -2,8 +2,8 @@ require 'crawler/scraper'
 require 'nokogiri'
 describe Scraper do
 
-  it "scrapes an HTML document for books" do
-    document = Nokogiri::HTML(File.open(File.dirname(__FILE__) + "/fixture.html"))
+  it "scrapes an HTML document for books #1" do
+    document = Nokogiri::HTML(File.open(File.dirname(__FILE__) + "/fixtures/fixture.html"))
 
     result = Scraper.scrape_page(document)
 
@@ -150,5 +150,67 @@ describe Scraper do
 
   end
 
+  it "scrapes an HTML document for books #2" do
+    document = Nokogiri::HTML(File.open(File.dirname(__FILE__) + "/fixtures/fixture_2.html"))
 
+    result = Scraper.scrape_page(document)
+
+    expect(result.length).to eq(4)
+    expect(result).to include(hash_including({
+      author: "I-CLICKER",
+      title: "I-CLICKER + RF RESPONSE REMOTE",
+      sku: "SKU: 9781464185922",
+      price: "Price: 40.00",
+      stock: "Estimated Copies Available:                1081                ",
+      term: "1151",
+      department: "CS",
+      course: "135",
+      section: "001",
+      instructor: "Vasiga,Troy Michael",
+      reqopt: "R"
+    }));
+
+    expect(result).to include(hash_including({
+      author: "FELLEISEN ET AL",
+      title: "HOW TO DESIGN PROGRAMS",
+      sku: "SKU: 9780262062183",
+      price: "Price: 97.00",
+      stock: "Estimated Copies Available:                50                ",
+      term: "1151",
+      department: "CS",
+      course: "135",
+      section: "001",
+      instructor: "Vasiga,Troy Michael",
+      reqopt: "O"
+    }));
+
+    expect(result).to include(hash_including({
+      author: "I-CLICKER",
+      title: "I-CLICKER + RF RESPONSE REMOTE",
+      sku: "SKU: 9781464185922",
+      price: "Price: 40.00",
+      stock: "Estimated Copies Available:                1081                ",
+      term: "1151",
+      department: "CS",
+      course: "135",
+      section: "002",
+      instructor: "Vasiga,Troy Michael",
+      reqopt: "R"
+    }));
+
+    expect(result).to include(hash_including({
+      author: "FELLEISEN ET AL",
+      title: "HOW TO DESIGN PROGRAMS",
+      sku: "SKU: 9780262062183",
+      price: "Price: 97.00",
+      stock: "Estimated Copies Available:                50                ",
+      term: "1151",
+      department: "CS",
+      course: "135",
+      section: "002",
+      instructor: "Vasiga,Troy Michael",
+      reqopt: "O"
+    }));
+
+  end
 end

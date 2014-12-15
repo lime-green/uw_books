@@ -2,7 +2,6 @@ require_relative 'scraper'
 class Crawler
   require 'mechanize'
   require 'net/http'
-  attr_reader :queue
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
 
   def initialize
@@ -18,8 +17,6 @@ class Crawler
     target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
     target_form.field_with(value: /[0-9]{4}/).option_with(value: @current_term).click # Select the term
     @root_page = @agent.submit(target_form) # first page of results
-
-    @queue = Array.new # array of hashes used to build records
   end
 
   def start_scrape!(link, thread_name)
