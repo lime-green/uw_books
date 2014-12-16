@@ -14,6 +14,7 @@ gem 'bootstrap-sass',       '3.2.0.2'
 gem 'will_paginate'
 gem 'bootstrap-will_paginate'
 gem 'mechanize'
+gem 'responders', '~> 2.0'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'
@@ -22,7 +23,7 @@ group :development, :test do
   gem 'spring',      '1.1.3'
   gem 'rspec-rails'
   gem 'faker'
-  gem 'factory_girl_rails'
+  gem 'factory_girl_rails', require: false
 end
 
 group :production do

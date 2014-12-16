@@ -7,29 +7,13 @@ FactoryGirl.define do
     f.instructor { Faker::Name.name }
     f.department { Faker::Lorem.characters(5) }
 
-    f.sku { Faker::Number.number(13) }
-    f.term { Faker::Number.number(4) }
+    f.sku { ((1..9).to_a.sample.to_s + Faker::Number.number(12).to_s).to_i }
+    f.term { ((1..9).to_a.sample.to_s + Faker::Number.number(3).to_s).to_i }
     f.price { Faker::Commerce.price }
     f.stock { Faker::Number.digit }
     f.section { "%03d" % Faker::Number.digit }
-    f.course { Faker::Number.number(3) }
+    f.course { ((1..9).to_a.sample.to_s + Faker::Number.number(2).to_s).to_i }
 
     f.reqopt [true, false].sample
   end
 end
-
-  #validates :author,     presence: true, allow_blank: false, length: { maximum: 255 }
-  #validates :title,      presence: true, allow_blank: false, length: { maximum: 255 }
-  #validates :instructor, presence: true, allow_blank: false, length: { maximum: 255 }
-  #validates :department, presence: true, allow_bank: false, length: { in: 2..10 }
-
-  ## numeric validations
-  #validates :sku, presence:  true, length: { is: 13 }
-  #validates :term, presence: true, length: { is: 4 }
-  #validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  #validates :stock, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  #validates :section, presence: true, allow_blank: false
-  #validates :course,  presence: true, allow_bank: false, length: { in: 3..4 }
-
-  ## boolean validations
-  #validates :reqopt, presence: true
