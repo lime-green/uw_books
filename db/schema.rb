@@ -22,7 +22,7 @@ ActiveRecord::Schema.define(version: 20141215203753) do
     t.integer  "term",                 null: false
     t.string   "department",           null: false
     t.string   "course",               null: false
-    t.integer  "section",              null: false
+    t.string   "section",              null: false
     t.string   "instructor",           null: false
     t.boolean  "reqopt",               null: false
     t.datetime "created_at",           null: false

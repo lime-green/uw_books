@@ -11,7 +11,7 @@ FactoryGirl.define do
     f.term { Faker::Number.number(4) }
     f.price { Faker::Commerce.price }
     f.stock { Faker::Number.digit }
-    f.section { Faker::Number.digit }
+    f.section { "%03d" % Faker::Number.digit }
     f.course { Faker::Number.number(3) }
 
     f.reqopt [true, false].sample

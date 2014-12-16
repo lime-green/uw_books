@@ -9,7 +9,7 @@ class CreateBooks < ActiveRecord::Migration
       t.integer :term, null: false
       t.string :department, null: false
       t.string :course, null: false
-      t.integer :section, null: false
+      t.string :section, null: false
       t.string :instructor, null: false
       t.boolean :reqopt, null: false
 
