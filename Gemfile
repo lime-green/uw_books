@@ -15,6 +15,7 @@ gem 'will_paginate'
 gem 'bootstrap-will_paginate'
 gem 'mechanize'
 gem 'responders', '~> 2.0'
+gem 'json_spec'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'

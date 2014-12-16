@@ -16,9 +16,15 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'rubygems'
 require 'factory_girl_rails'
+require 'json_spec'
 
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
+  config.include JsonSpec::Helpers
+end
+
+JsonSpec.configure do
+  exclude_keys "created_at", "updated_at"
 end
 
 RSpec.configure do |config|
