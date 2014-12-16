@@ -16,16 +16,10 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'rubygems'
 require 'factory_girl_rails'
-require 'active_record'
-
-require_relative 'factories/books'
-require_relative '../app/models/book'
 
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
 end
-
-ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => File.join(File.dirname(__FILE__), "../db/test.sqlite3"))
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

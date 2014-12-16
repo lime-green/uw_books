@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + '/../../app/repositories/book_repository'
 require 'spec_helper'
+require 'rails_helper'
 
 describe BookRepository do
   it "finds all books for a given course" do

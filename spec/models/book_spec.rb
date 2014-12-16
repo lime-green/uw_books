@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 describe Book do
   it "has a valid factory" do
     factory = FactoryGirl.build(:book)
