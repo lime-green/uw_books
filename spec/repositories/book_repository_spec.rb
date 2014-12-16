@@ -1,4 +1,3 @@
-require File.dirname(__FILE__) + '/../../app/repositories/book_repository'
 require 'spec_helper'
 require 'rails_helper'
 

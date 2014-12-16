@@ -1,6 +1,5 @@
 require "spec_helper"
 require "rails_helper"
-require File.expand_path("../../app/controllers/api/v1/books_controller", File.dirname(__FILE__))
 
 describe Api::V1::BooksController do
   describe "#index" do
