@@ -2,6 +2,7 @@ ruby '2.1.5'
 
 source 'https://rubygems.org'
 
+gem 'active_model_serializers'
 gem 'rails',                '4.2.0.rc1'
 gem 'sass-rails',           '5.0.0.beta1'
 gem 'uglifier',             '2.5.3'

@@ -12,10 +12,4 @@ class Book < ActiveRecord::Base
   # boolean validations
   validates :reqopt, inclusion: [true, false]
 
-  def as_json(options={})
-    super(
-      except: [:id],
-      include: { courses: { except: [:id] } }.merge(options)
-    )
-  end
 end
