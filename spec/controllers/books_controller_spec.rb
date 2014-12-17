@@ -9,7 +9,9 @@ describe Api::V1::BooksController do
     end
 
     it "does not have id field" do
-      expect(response.body.first).not_to have_json_path("id")
+      FactoryGirl.create :book
+      get :index, format: :json
+      expect(parse_json(response.body).first.to_json).not_to have_json_path("id")
     end
 
     it "returns correct number of records" do

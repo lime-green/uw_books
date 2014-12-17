@@ -2,7 +2,7 @@ class Api::V1::BooksController < ApplicationController
 
   def index
     respond_to do |format|
-      format.json { render json: Book.all, except: [:id] }
+      format.json { render json: JSON.pretty_generate(Book.all.as_json except: [:id]) }
 
     end
   end
@@ -10,7 +10,7 @@ class Api::V1::BooksController < ApplicationController
   def show
     respond_to do |format|
       @books = BookRepository.find_by_course(params[:department], params[:number])
-      format.json { render json: @books, except: [:id] }
+      format.json { render json: JSON.pretty_generate(@books.as_json except: [:id]) }
     end
   end
 end
