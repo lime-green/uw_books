@@ -21,9 +21,22 @@ describe Api::V1::BooksController do
     end
 
     it "returns valid JSON data" do
-      expected_record = FactoryGirl.create :book
+      book = FactoryGirl.create :book, :with_courses
+
+      expected_data = {
+        author: book.author,
+        title: book.title,
+        sku: book.sku,
+        price: book.price,
+        stock: book.stock,
+        reqopt: book.reqopt,
+        created_at: book.created_at,
+        updated_at: book.updated_at,
+        courses: book.courses
+      }
+
       get :index, format: :json
-      expect(response.body).to include_json(expected_record.to_json).excluding("id")
+      expect(response.body).to include_json(expected_data.to_json).excluding("id")
     end
   end
 end

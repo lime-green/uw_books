@@ -10,6 +10,10 @@ FactoryGirl.define do
     f.stock { Faker::Number.digit }
 
     f.reqopt [true, false].sample
+
+    trait :with_courses do
+      f.courses { [FactoryGirl.create(:course)] }
+    end
   end
 
   factory :course do |f|
