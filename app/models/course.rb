@@ -1,5 +1,5 @@
 class Course < ActiveRecord::Base
-  before_save :downcase_indices
+  before_save :upcase_indices
   has_and_belongs_to_many :books
 
   validates :instructor, presence: true, allow_blank: false, length: { maximum: 255 }
@@ -9,7 +9,7 @@ class Course < ActiveRecord::Base
   validates :term, presence: true, length: { is: 4 }
 
   private
-  def downcase_indices
-    department.downcase!
+  def upcase_indices
+    department.upcase!
   end
 end
