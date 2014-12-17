@@ -21,7 +21,8 @@ describe Api::V1::BooksController do
     end
 
     it "returns valid JSON data" do
-      book = FactoryGirl.create :book, :with_courses
+      book = FactoryGirl.create :book, :with_single_course
+      course = book.courses.first
 
       expected_data = {
         author: book.author,
@@ -32,7 +33,13 @@ describe Api::V1::BooksController do
         reqopt: book.reqopt,
         created_at: book.created_at,
         updated_at: book.updated_at,
-        courses: book.courses
+        courses: [{
+          number: course.number,
+          section: course.section,
+          instructor: course.instructor,
+          department: course.department,
+          term: course.term
+        }]
       }
 
       get :index, format: :json

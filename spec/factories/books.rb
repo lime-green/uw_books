@@ -11,7 +11,7 @@ FactoryGirl.define do
 
     f.reqopt [true, false].sample
 
-    trait :with_courses do
+    trait :with_single_course do
       f.courses { [FactoryGirl.create(:course)] }
     end
   end
