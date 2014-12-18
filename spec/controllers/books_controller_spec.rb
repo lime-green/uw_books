@@ -31,13 +31,11 @@ describe Api::V1::BooksController do
         price: book.price,
         stock: book.stock,
         reqopt: book.reqopt,
-        created_at: book.created_at,
-        updated_at: book.updated_at,
         courses: [{
+          department: course.department,
           number: course.number,
           section: course.section,
           instructor: course.instructor,
-          department: course.department,
           term: course.term
         }]
       }
@@ -45,5 +43,27 @@ describe Api::V1::BooksController do
       get :index, format: :json
       expect(response.body).to include_json(expected_data.to_json).excluding("id")
     end
+  end
+
+  it "looks pretty (has newlines)" do
+    book = FactoryGirl.create :book, :with_single_course
+    course = book.courses.first
+      expected_data = [{
+        author: book.author,
+        title: book.title,
+        sku: book.sku,
+        price: book.price,
+        stock: book.stock,
+        reqopt: book.reqopt,
+        courses: [
+          department: course.department,
+          number: course.number,
+          section: course.section,
+          instructor: course.instructor,
+          term: course.term
+        ]
+      }]
+      get :index, format: :json
+      expect(response.body).to eq(JSON.pretty_generate(expected_data.as_json))
   end
 end
