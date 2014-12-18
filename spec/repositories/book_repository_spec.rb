@@ -14,6 +14,9 @@ describe BookRepository do
 
     course.books << book
     course.save
-    expect(BookRepository.find_by_course("CS", "777")).to eq([book])
+
+    actual = CourseRepository.find_by_course("CS", "777")
+    expect(actual.length).to eq(1)
+    expect(actual.first.books).to eq([book])
   end
 end
