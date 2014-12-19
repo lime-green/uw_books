@@ -1,5 +1,6 @@
 class Course < ActiveRecord::Base
   before_save :upcase_indices
+  default_scope lambda { order("department, number") }
   has_and_belongs_to_many :books
 
   validates :instructor, presence: true, allow_blank: false, length: { maximum: 255 }

@@ -10,6 +10,15 @@ RSpec.describe Course, :type => :model do
     expect(saved[:department]).to eq("MATH")
   end
 
+  it "saves courses in ascending order" do
+    second = FactoryGirl.create(:course, department: "CS", number: 145)
+    first = FactoryGirl.create(:course, department: "CS", number: 135)
+    expect(Course.all.length).to eq(3)
+    expect(Course.first).to eq(first)
+    expect(Course.second).to eq(second)
+    expect(Course.third).to eq(@course)
+  end
+
   context "validations" do
     %w(instructor section department).each do |attribute|
       context attribute do
