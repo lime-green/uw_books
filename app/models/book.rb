@@ -11,5 +11,4 @@ class Book < ActiveRecord::Base
 
   # boolean validations
   validates :reqopt, inclusion: [true, false]
-
 end
