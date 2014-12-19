@@ -1,4 +1,4 @@
 class BookPartialSerializer < ActiveModel::Serializer
-  attributes :title, :author, :sku, :price, :stock, :reqopt
+  attributes :author, :title, :sku, :price, :stock, :reqopt
 end
 

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe BookRepository do
+describe CourseRepository do
   it "finds all books for a given course" do
     book = FactoryGirl.create :book
     course = FactoryGirl.create :course, department: "CS", number: "777"
@@ -14,9 +14,9 @@ describe BookRepository do
     course.books << book
     course.save
 
-    actual = BookRepository.find_by_course("CS", "777")
+    actual = CourseRepository.find_by_course("CS", "777")
     expect(actual.length).to eq(1)
-    expect(actual).to eq([book])
-    expect(actual.first.courses).to eq([course])
+    expect(actual).to eq([course])
+    expect(actual.first.books).to eq([books])
   end
 end

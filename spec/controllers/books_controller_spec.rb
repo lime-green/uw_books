@@ -20,34 +20,9 @@ describe Api::V1::BooksController do
       expect(response.body).to have_json_size(10)
     end
 
-    it "returns valid JSON data" do
+    it "returns correct JSON (with newlines)" do
       book = FactoryGirl.create :book, :with_single_course
       course = book.courses.first
-
-      expected_data = {
-        author: book.author,
-        title: book.title,
-        sku: book.sku,
-        price: book.price,
-        stock: book.stock,
-        reqopt: book.reqopt,
-        courses: [{
-          department: course.department,
-          number: course.number,
-          section: course.section,
-          instructor: course.instructor,
-          term: course.term
-        }]
-      }
-
-      get :index, format: :json
-      expect(response.body).to include_json(expected_data.to_json).excluding("id")
-    end
-  end
-
-  it "looks pretty (has newlines)" do
-    book = FactoryGirl.create :book, :with_single_course
-    course = book.courses.first
       expected_data = [{
         author: book.author,
         title: book.title,
@@ -65,5 +40,6 @@ describe Api::V1::BooksController do
       }]
       get :index, format: :json
       expect(response.body).to eq(JSON.pretty_generate(expected_data.as_json))
+    end
   end
 end
