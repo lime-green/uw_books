@@ -60,26 +60,42 @@ RSpec.describe Course, :type => :model do
       expect(course).to be_valid
     end
 
-    it "must have a course number between 3 to 5 digits" do
-      course.number = 12
-      expect(course).not_to be_valid
-      course.number = 123456
-      expect(course).not_to be_valid
-      course.number = 123
-      expect(course).to be_valid
-      course.number = 1234
-      expect(course).to be_valid
-      course.number = 12345
-      expect(course).to be_valid
+    context "number" do
+      it "must be a string" do
+        course.number = "114A"
+        course.save
+        expect(Course.first.number).to eq(course.number)
+      end
+
+      it "must have a course number between 3 to 5 digits" do
+        course.number = 12
+        expect(course).not_to be_valid
+        course.number = 123456
+        expect(course).not_to be_valid
+        course.number = 123
+        expect(course).to be_valid
+        course.number = 1234
+        expect(course).to be_valid
+        course.number = 12345
+        expect(course).to be_valid
+      end
     end
 
-    it "must have a term number of exactly four digits" do
-      course.term = 123
-      expect(course).not_to be_valid
-      course.term = 12345
-      expect(course).not_to be_valid
-      course.term = 1234
-      expect(course).to be_valid
+    context "term" do
+      it "must be a string" do
+        course.term = "114A"
+        course.save
+        expect(Course.first.term).to eq(course.term)
+      end
+
+      it "must have a term number of exactly four digits" do
+        course.term = 123
+        expect(course).not_to be_valid
+        course.term = 12345
+        expect(course).not_to be_valid
+        course.term = 1234
+        expect(course).to be_valid
+      end
     end
   end
 end

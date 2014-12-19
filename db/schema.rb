@@ -14,14 +14,14 @@
 ActiveRecord::Schema.define(version: 20141217163116) do
 
   create_table "books", force: true do |t|
-    t.string   "author",               null: false
-    t.string   "title",                null: false
-    t.integer  "sku",        limit: 8, null: false
-    t.float    "price",                null: false
-    t.integer  "stock",                null: false
-    t.boolean  "reqopt",               null: false
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
+    t.string   "author",     null: false
+    t.string   "title",      null: false
+    t.string   "sku",        null: false
+    t.float    "price",      null: false
+    t.integer  "stock",      null: false
+    t.boolean  "reqopt",     null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "books_courses", id: false, force: true do |t|
@@ -30,11 +30,11 @@ ActiveRecord::Schema.define(version: 20141217163116) do
   end
 
   create_table "courses", force: true do |t|
-    t.integer  "number",     null: false
+    t.string   "number",     null: false
     t.string   "section",    null: false
     t.string   "instructor", null: false
     t.string   "department", null: false
-    t.integer  "term",       null: false
+    t.string   "term",       null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

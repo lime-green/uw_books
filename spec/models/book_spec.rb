@@ -46,6 +46,12 @@ RSpec.describe Book, :type => :model do
     end
 
     context "sku" do
+      it "is a string" do
+        book.sku = "123456789012A"
+        book.save
+        expect(Book.first.sku).to eq(book.sku)
+      end
+
       it "can't be empty" do
         book.sku = ""
         expect(book).not_to be_valid
