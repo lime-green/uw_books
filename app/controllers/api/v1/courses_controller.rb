@@ -8,8 +8,10 @@ class Api::V1::CoursesController < ApplicationController
   end
 
   def show
-    @course = CourseRepository.find_by_course(params[:department], params[:number])
+    course = CourseRepository.find_by_course(params[:department], params[:number])
+    course = course.page(params[:page]).per_page(40)
+
     respond_with(JSON.pretty_generate(
-      ActiveModel::ArraySerializer.new(@course, each_serializer: CourseSerializer).as_json))
+      ::CourseArraySerializer.new(course, each_serializer: CourseSerializer).as_json))
   end
 end

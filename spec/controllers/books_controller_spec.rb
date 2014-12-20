@@ -11,7 +11,13 @@ describe Api::V1::BooksController, :type => :controller do
     it "does not have id field" do
       FactoryGirl.create :book
       get :index, format: :json
-      expect(parse_json(response.body).first.to_json).not_to have_json_path("id")
+      expect(parse_json(response.body)["books"].first.to_json).not_to have_json_path("id")
+    end
+
+    it "returns correct number of entries" do
+      10.times { FactoryGirl.create :book, :with_single_course }
+      get :index, format: :json
+      expect(parse_json(response.body)["books"].to_json).to have_json_size(10)
     end
 
     it "returns correct JSON (with newlines)" do
@@ -19,8 +25,9 @@ describe Api::V1::BooksController, :type => :controller do
       course = book.courses.first
       expected_data = {meta: {
         current_page: 1,
+        next_page: nil,
+        total_entries: 1,
         per_page: 40,
-        total_entries: 1
       },
       books: [
         {
@@ -56,26 +63,26 @@ describe Api::V1::BooksController, :type => :controller do
       course.books << book
       course.save
       get :show, format: :json, department: "CS", number: 145
-      expect(parse_json(response.body).first.to_json).not_to have_json_path("id")
+      expect(parse_json(response.body)["books"].first.to_json).not_to have_json_path("id")
     end
 
-    it "returns correct number of records" do
+    it "returns correct number of entries" do
       6.times do
         book = FactoryGirl.create :book
-        course = FactoryGirl.create :course, department: "CS", number: "145"
+        course = FactoryGirl.create :course, department: "CS", number: "241"
         course.books << book
         course.save
       end
 
       5.times do
         book = FactoryGirl.create :book
-        course = FactoryGirl.create :course, department: "MATH"
+        course = FactoryGirl.create :course, department: "CS", number: "251"
         course.books << book
         course.save
       end
 
-      get :show, format: :json, department: "CS", number: 145
-      expect(response.body).to have_json_size(6)
+      get :show, format: :json, department: "CS", number: "241"
+      expect(parse_json(response.body)["books"].to_json).to have_json_size(6)
     end
 
     it "returns correct JSON (with newlines)" do
@@ -83,21 +90,29 @@ describe Api::V1::BooksController, :type => :controller do
       book = FactoryGirl.create :book
       course.books << book
       course.save
-      expected_data = [{
-        author: book.author,
-        title: book.title,
-        sku: book.sku,
-        price: book.price,
-        stock: book.stock,
-        reqopt: book.reqopt,
-        courses: [
-          department: course.department,
-          number: course.number,
-          section: course.section,
-          instructor: course.instructor,
-          term: course.term
-        ]
-      }]
+      expected_data = {meta: {
+        current_page: 1,
+        next_page: nil,
+        total_entries: 1,
+        per_page: 40,
+      },
+      books: [
+        {
+          author: book.author,
+          title: book.title,
+          sku: book.sku,
+          price: book.price,
+          stock: book.stock,
+          reqopt: book.reqopt,
+
+          courses: [
+            department: course.department,
+            number: course.number,
+            section: course.section,
+            instructor: course.instructor,
+            term: course.term
+          ]
+        }]}
       get :show, format: :json, department: "CS", number: 145
       expect(response.body).to eq(JSON.pretty_generate(expected_data.as_json))
     end

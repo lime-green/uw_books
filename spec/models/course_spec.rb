@@ -8,13 +8,15 @@ RSpec.describe Course, :type => :model do
   end
 
   it "returns courses in ascending order" do
-    second = FactoryGirl.create(:course, department: "CS", number: 145)
-    third = FactoryGirl.create(:course, department: "mAtH")
-    first = FactoryGirl.create(:course, department: "CS", number: 135)
-    expect(Course.all.length).to eq(3)
+    second = FactoryGirl.create(:course, department: "CS", number: 135, section: "004")
+    third = FactoryGirl.create(:course, department: "CS", number: 145)
+    last = FactoryGirl.create(:course, department: "mAtH")
+    first = FactoryGirl.create(:course, department: "CS", number: 135, section: "002")
+    expect(Course.all.length).to eq(4)
     expect(Course.first).to eq(first)
     expect(Course.second).to eq(second)
     expect(Course.third).to eq(third)
+    expect(Course.last).to eq(last)
   end
 
   context "validations" do
