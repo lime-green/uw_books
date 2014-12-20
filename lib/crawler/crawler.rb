@@ -1,30 +1,32 @@
 require_relative 'scraper'
+require 'digest'
+require 'mechanize'
+require 'net/http'
+
 class Crawler
-  require 'mechanize'
-  require 'net/http'
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
   CURRENT_TERM = "1149" # calculate this?
 
-  VERBOSE = true        # useful messages
+  PAGE_CONNECTION_ATTEMPT_MAX = 5
+
+  VERBOSE = true # useful messages
 
   SLICE_MAX = 5         # crawl this amount of links asynchronously
   RETRY_DELAY = 10      # sleep for this amount of seconds after a failed request
 
   def initialize
-
-    # Prepare page
     @agent = Mechanize.new
-    @root_page = @agent.get(ROOT_URL)
-    target_form = @root_page.at('div#search_box_course form') # Nokogiri object
-    target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
-    target_form.field_with(value: /[0-9]{4}/).option_with(value: CURRENT_TERM).click # Select the term
-    @root_page = @agent.submit(target_form) # first page of results
   end
+
+  def get_books
+    crawl
+  end
+
+  private
 
   def get_page(link, thread_name)
     attempt = 1
-    attempt_max = 5
-    while attempt <= attempt_max do
+    while attempt <= PAGE_CONNECTION_ATTEMPT_MAX do
       begin
         page = @agent.get(link.href)
         break
@@ -38,13 +40,16 @@ class Crawler
         end
       end
     end
-    raise "Over #{attempt_max} attempts made for #{link.href}, exiting" if attempt > attempt_max
+    raise "Over #{PAGE_CONNECTION_ATTEMPT_MAX} attempts made for #{link.href}, exiting" if attempt > PAGE_CONNECTION_ATTEMPT_MAX
     return page
   end
 
-  def crawl!
+  def crawl
+    root_page = @agent.get(ROOT_URL)
+    first_page = submit_form(root_page)
+
     # Retrieve all links to paginated results. As at Dec 10/2014 there are 301 pages for term 1149
-    links = @root_page.links_with(href: /book\/scan/).uniq { |link| link.href }
+    links = first_page.links_with(href: /book\/scan/).uniq { |link| link.href }
 
     threads = []
     num_threads = 1
@@ -52,7 +57,7 @@ class Crawler
     books = Queue.new
 
     threads << Thread.new do
-      add_books(books, @root_page)
+      add_books(books, first_page)
     end
 
     # for now, scrape only 10 links (2 slices of 5)
@@ -69,14 +74,20 @@ class Crawler
       print_verbose "Done scraping that set"
     end
 
-    # save all this data
-    write_DB!(books)
-  end # end crawl! function
+    result = []
 
-  # ALL PRIVATE FUNCTIONS FOLLOW
-  private
-  def print_verbose(string)
-    print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if VERBOSE
+    while books.length > 0 do
+      result << books.pop
+    end
+
+    result
+  end
+
+  def submit_form(root_page)
+    target_form = root_page.at('div#search_box_course form') # Nokogiri object
+    target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
+    target_form.field_with(value: /[0-9]{4}/).option_with(value: CURRENT_TERM).click # Select the term
+    @agent.submit(target_form) # first page of results
   end
 
   def add_books(books, document)
@@ -85,13 +96,7 @@ class Crawler
     end
   end
 
-  def write_DB!(records)
-    print_verbose "Writing to database"
-    ActiveRecord::Base.transaction do
-      while records.length > 0 do
-        # Book.create(row) or Book.update_attributes(row) if it exists
-        pp records.pop
-      end
-    end
-  end # end write_DB function
-end # end class
+  def print_verbose(string)
+    print "====Crawler(verbose)====\n#{string}\n====END verbose====\n\n" if VERBOSE
+  end
+end
