@@ -2,8 +2,9 @@ class Api::V1::BooksController < ApplicationController
   respond_to :json
 
   def index
+    books = Book.page(params[:page]).per_page(40)
     respond_with(JSON.pretty_generate(
-      ActiveModel::ArraySerializer.new(Book.all, each_serializer: BookSerializer).as_json))
+      ::BookArraySerializer.new(books, each_serializer: BookSerializer).as_json))
   end
 
   def show

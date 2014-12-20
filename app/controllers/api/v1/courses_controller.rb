@@ -2,8 +2,9 @@ class Api::V1::CoursesController < ApplicationController
   respond_to :json
 
   def index
+    courses = Course.page(params[:page]).per_page(40)
     respond_with(JSON.pretty_generate(
-      ActiveModel::ArraySerializer.new(Course.all, each_serializer: CourseSerializer).as_json))
+      ::CourseArraySerializer.new(courses, each_serializer: CourseSerializer).as_json))
   end
 
   def show
