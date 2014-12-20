@@ -1,16 +1,19 @@
 require_relative 'scraper'
+require 'digest'
 class Crawler
   require 'mechanize'
   require 'net/http'
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
   CURRENT_TERM = "1149" # calculate this?
 
-  VERBOSE = true        # useful messages
+  VERBOSE = false # useful messages
 
   SLICE_MAX = 5         # crawl this amount of links asynchronously
   RETRY_DELAY = 10      # sleep for this amount of seconds after a failed request
 
   def initialize
+
+    @output = []
 
     # Prepare page
     @agent = Mechanize.new
@@ -73,6 +76,29 @@ class Crawler
     write_DB!(books)
   end # end crawl! function
 
+  def get_characterization
+    @output.sort! do |x,y|
+      sku_comparison = x[:sku] <=> y[:sku]
+      if sku_comparison == 0
+        instructor_comparison = x[:instructor] <=> y[:instructor]
+        if instructor_comparison == 0
+          course_comparison = x[:course] <=> y[:course]
+          if course_comparison == 0
+            x[:section] <=> y[:section]
+          else
+            course_comparison
+          end
+        else
+          instructor_comparison
+        end
+      else
+        sku_comparison
+      end
+    end
+
+    Digest::SHA256.hexdigest @output.to_s
+  end
+
   # ALL PRIVATE FUNCTIONS FOLLOW
   private
   def print_verbose(string)
@@ -87,11 +113,9 @@ class Crawler
 
   def write_DB!(records)
     print_verbose "Writing to database"
-    ActiveRecord::Base.transaction do
-      while records.length > 0 do
-        # Book.create(row) or Book.update_attributes(row) if it exists
-        pp records.pop
-      end
+    while records.length > 0 do
+      # Book.create(row) or Book.update_attributes(row) if it exists
+      @output << records.pop
     end
   end # end write_DB function
 end # end class
