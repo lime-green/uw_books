@@ -1,9 +1,12 @@
 class Course < ActiveRecord::Base
-  before_save :upcase_indices
+  before_validation :upcase_indices
   default_scope lambda { order("department, number, section") }
   has_and_belongs_to_many :books
 
-  validates :instructor, presence: true, allow_blank: false, length: { maximum: 255 }
+  validates :instructor,
+    presence: true, allow_blank: false, length: { maximum: 255 },
+    uniqueness: { scope: [:department, :number, :term, :section] }
+
   validates :section,    presence: true, allow_blank: false, length: { is: 3 }
   validates :department, presence: true, allow_bank:  false, length: { in: 2..10 }
   validates :number,  presence: true, allow_bank: false, length: { in: 3..5 }

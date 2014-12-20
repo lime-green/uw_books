@@ -46,6 +46,18 @@ RSpec.describe Book, :type => :model do
     end
 
     context "sku" do
+      context "duplicate" do
+        let (:dup) { FactoryGirl.build :book, sku: book.sku }
+
+        it "does not validate" do
+          expect(dup).not_to be_valid
+        end
+
+        it "does not save" do
+          expect { dup.save! }.to raise_error(ActiveRecord::RecordInvalid)
+        end
+      end
+
       it "is a string" do
         book.sku = "123456789012A"
         book.save

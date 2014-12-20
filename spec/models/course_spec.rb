@@ -2,6 +2,13 @@ require 'rails_helper'
 
 RSpec.describe Course, :type => :model do
 
+  it "treats departments with same letters but different case as invalid" do
+    course = FactoryGirl.create(:course, department: "mAtH")
+    dup = course.dup
+    dup[:department] = "MaTh"
+    expect(dup).not_to be_valid
+  end
+
   it "saves department as uppercase" do
     course = FactoryGirl.create(:course, department: "mAtH")
     expect(course.department).to eq("MATH")
@@ -22,6 +29,18 @@ RSpec.describe Course, :type => :model do
   context "validations" do
 
     let (:course) { FactoryGirl.create(:course) }
+
+    context "duplicate" do
+      let (:dup) { course.dup }
+
+      it "does not validate" do
+        expect(dup).not_to be_valid
+      end
+
+      it "does not save" do
+        expect { dup.save! }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+    end
 
     %w(instructor section department).each do |attribute|
       context attribute do

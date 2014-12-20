@@ -4,7 +4,7 @@ namespace :crawler do
   desc "crawls the blooklook website and write book information to database"
   task crawl: :environment do
     pp Rails.env
-    Crawler.new.crawl!
+    pp Crawler.new.get_books
   end
 
 end # end namespace
