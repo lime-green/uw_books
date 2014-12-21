@@ -10,7 +10,7 @@ class MultiRepository < Repository
     book = BookRepository.new_record(book_hash)
     course = CourseRepository.new_record(course_hash)
 
-    return nil if !book && !course # both already exist
+    return false if !book && !course # both already exist
 
     if book && !course
       course = CourseRepository.find(course_hash) # find the course that already exists
