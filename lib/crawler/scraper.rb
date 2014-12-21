@@ -7,7 +7,7 @@ module Scraper
         title: book_node.css(".title").text,
         sku: book_node.css(".sku").text.delete(" ").gsub(/.*:/, ""),
         price: book_node.css(".price").text.delete(" ").gsub(/.*:/, "").to_f,
-        stock: book_node.css(".stock").text.gsub(/[\n\t]/, "").delete(" ").gsub(/.*:/, ""),
+        stock: book_node.css(".stock").text.gsub(/[\n\t]/, "").delete(" ").gsub(/.*:/, "").to_i,
         term: book_node.at_xpath("input[@name='mv_order_orderline_term']")[:value],
         department: book_node.at_xpath("input[@name='mv_order_orderline_department']")[:value],
         course: book_node.at_xpath("input[@name='mv_order_orderline_course']")[:value],
