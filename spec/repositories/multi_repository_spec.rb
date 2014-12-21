@@ -79,5 +79,8 @@ describe MultiRepository do
       expect(course.books).to eq([ book ])
       expect(book.courses).to eq([ course ])
     end
+
+    it "does not add the same book to a Course's books collection twice" do
+    end
   end
 end

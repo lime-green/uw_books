@@ -26,7 +26,7 @@ RSpec.describe Book, :type => :model do
       end
     end
 
-    %w(price stock).each do |attribute|
+    %w(price).each do |attribute|
       context attribute do
         it "can't be empty" do
           book[attribute] = ""

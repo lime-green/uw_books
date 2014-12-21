@@ -3,9 +3,7 @@ class Course < ActiveRecord::Base
   default_scope lambda { order("department, number, section") }
   has_and_belongs_to_many :books
 
-  validates :instructor,
-    presence: true, allow_blank: false, length: { maximum: 255 },
-    uniqueness: { scope: [:department, :number, :term, :section] }
+  validates :instructor, length: { maximum: 255 }, uniqueness: { scope: [:department, :number, :term, :section] }
 
   validates :section,    presence: true, allow_blank: false, length: { is: 3 }
   validates :department, presence: true, allow_bank:  false, length: { in: 2..10 }

@@ -14,8 +14,8 @@ class MultiRepository < Repository
 
     if book && !course
       course = CourseRepository.find(course_hash) # find the course that already exists
-    else
-      book = BookRepository.find(book_hash) # find the book that already exists
+    elsif !book && course
+      book = BookRepository.find(sku: book_hash[:sku]) # find the book that already exists
     end
 
     course.books << book

@@ -42,7 +42,7 @@ RSpec.describe Course, :type => :model do
       end
     end
 
-    %w(instructor section department).each do |attribute|
+    %w(section department).each do |attribute|
       context attribute do
         it "can't be the empty string" do
           course[attribute] = ""

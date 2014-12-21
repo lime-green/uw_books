@@ -7,7 +7,7 @@ class Book < ActiveRecord::Base
   # numeric validations
   validates :sku, presence:  true, length: { is: 13 }, uniqueness: true
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :stock, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :stock, presence: true
 
   # boolean validations
   validates :reqopt, inclusion: [true, false]
