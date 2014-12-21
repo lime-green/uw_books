@@ -6,8 +6,8 @@ describe BookHashTranslator do
       author: "BROWN & KOPP",
       title: "FINANCIAL MATHEMATICS: THEORY & PRACTICE",
       sku: "9781259033803",
-      price: "87.95",
-      stock: "121",
+      price: 87.95,
+      stock: 121,
       term: "1149",
       department: "ACTSC",
       course: "231",
@@ -22,14 +22,14 @@ describe BookHashTranslator do
       author: "BROWN & KOPP",
       title: "FINANCIAL MATHEMATICS: THEORY & PRACTICE",
       sku: "9781259033803",
-      price: "87.95",
-      stock: "121",
+      price: 87.95,
+      stock: 121,
       term: "1149",
       department: "ACTSC",
       number: "231",
       section: "001",
       instructor: "Freeland,R Keith",
-      reqopt: "R"
+      reqopt: true
     }
     expect(output).to eq(expected_output)
   end
