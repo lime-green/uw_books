@@ -14,7 +14,7 @@ class CourseRepository < Repository
   end
 
   private
-  def self.this
+  def self.model
     Course
   end
 end

@@ -2,16 +2,16 @@ class Repository
 
   def self.find(hash)
     raise "Missing key in hash: #{hash}. Need: #{required}" unless param_require(hash)
-    this.find_by(hash)
+    model.find_by(hash)
   end
 
   def self.exists?(hash)
-    this.exists?(hash)
+    model.exists?(hash)
   end
 
   def self.new_record(hash)
     raise "Missing key in hash: #{hash}. Need: #{required}" unless param_require(hash)
-    this.create(hash) unless exists?(hash)
+    model.create(hash) unless exists?(hash)
   end
 
   protected
