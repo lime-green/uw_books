@@ -10,7 +10,7 @@ class MultiRepository < Repository
     book = BookRepository.new_record(book_hash)
     course = CourseRepository.new_record(course_hash)
 
-    course.books << book
+    course.books << book unless course.books.include?(book)
     course.save
   end
 

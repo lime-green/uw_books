@@ -43,6 +43,8 @@ describe MultiRepository do
       course.books << book; course.save
       expect { MultiRepository.new_record hash }.to_not change { Book.count }
       expect { MultiRepository.new_record hash }.to_not change { Course.count }
+      expect { MultiRepository.new_record hash }.to_not change { course.books.count }
+      expect { MultiRepository.new_record hash }.to_not change { book.courses.count }
     end
 
     it "creates a book but not a course if course already exists" do
