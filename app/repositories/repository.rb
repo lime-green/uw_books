@@ -10,7 +10,7 @@ class Repository
 
   def self.new_record(hash)
     raise "Missing key in hash: #{hash}. Need: #{required}" unless param_require(hash)
-    model.create!(hash) unless exists?(hash)
+    model.find_or_create_by!(hash)
   end
 
   protected

@@ -10,14 +10,6 @@ class MultiRepository < Repository
     book = BookRepository.new_record(book_hash)
     course = CourseRepository.new_record(course_hash)
 
-    return false if !book && !course # both already exist
-
-    if book && !course
-      course = CourseRepository.find(course_hash) # find the course that already exists
-    elsif !book && course
-      book = BookRepository.find(sku: book_hash[:sku]) # find the book that already exists
-    end
-
     course.books << book
     course.save
   end

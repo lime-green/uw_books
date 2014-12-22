@@ -23,7 +23,7 @@ class BookRepository < Repository
 
   def self.new_record(hash)
     raise "Missing key in hash: #{hash}. Need: #{required}" unless param_require(hash)
-    model.create!(hash) unless exists?(sku: hash[:sku])
+    model.find_by(sku: hash[:sku]) || model.create!(hash)
   end
 
   private
