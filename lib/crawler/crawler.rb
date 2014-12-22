@@ -61,7 +61,7 @@ class Crawler
     end
 
     # for now, scrape only 10 links (2 slices of 5)
-    links.take(10).each_slice(SLICE_MAX) do |slice|
+    links.each_slice(SLICE_MAX) do |slice|
       slice.each do |link|
         threads << Thread.new do
           num_threads += 1;

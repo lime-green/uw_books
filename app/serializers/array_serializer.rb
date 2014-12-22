@@ -4,6 +4,7 @@ class ArraySerializer < ActiveModel::ArraySerializer
     meta_hash = {
       current_page: @object.current_page,
       next_page: @object.next_page,
+      total_pages: ( @object.total_entries.to_f / @object.per_page ).ceil,
       total_entries: @object.total_entries,
       per_page: @object.per_page,
     }

@@ -7,7 +7,7 @@ class Course < ActiveRecord::Base
 
   validates :section,    presence: true, allow_blank: false, length: { is: 3 }
   validates :department, presence: true, allow_bank:  false, length: { in: 2..10 }
-  validates :number,  presence: true, allow_bank: false, length: { in: 3..5 }
+  validates :number,  presence: true, allow_bank: false
   validates :term, presence: true, length: { is: 4 }
 
   private

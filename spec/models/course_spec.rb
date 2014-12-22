@@ -87,19 +87,6 @@ RSpec.describe Course, :type => :model do
         course.save
         expect(Course.first.number).to eq(course.number)
       end
-
-      it "must have a course number between 3 to 5 digits" do
-        course.number = 12
-        expect(course).not_to be_valid
-        course.number = 123456
-        expect(course).not_to be_valid
-        course.number = 123
-        expect(course).to be_valid
-        course.number = 1234
-        expect(course).to be_valid
-        course.number = 12345
-        expect(course).to be_valid
-      end
     end
 
     context "term" do

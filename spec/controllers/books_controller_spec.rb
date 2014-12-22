@@ -26,6 +26,7 @@ describe Api::V1::BooksController, :type => :controller do
       expected_data = {meta: {
         current_page: 1,
         next_page: nil,
+        total_pages: 1,
         total_entries: 1,
         per_page: 40,
       },
@@ -93,6 +94,7 @@ describe Api::V1::BooksController, :type => :controller do
       expected_data = {meta: {
         current_page: 1,
         next_page: nil,
+        total_pages: 1,
         total_entries: 1,
         per_page: 40,
       },
