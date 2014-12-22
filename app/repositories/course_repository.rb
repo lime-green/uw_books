@@ -4,6 +4,16 @@ class CourseRepository < Repository
     Course.where(department: department.upcase, number: course_number)
   end
 
+  def self.where_course(options = {})
+    hash = {}
+    options.each do |k, v|
+      v.upcase! if k == "department"
+      hash.merge! "courses.#{k}" => v
+    end
+
+    Course.where( hash )
+  end
+
   def self.new_record(hash)
     hash[:department].upcase!
     super(hash)

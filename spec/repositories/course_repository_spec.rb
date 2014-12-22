@@ -4,17 +4,47 @@ describe CourseRepository do
   let (:hash) {  { department: "CS", number: "135", section: "005", term: "1149", instructor: "Brad Lushman" } }
   let! (:book) { FactoryGirl.create :book }
   let! (:course) do
-    temp = FactoryGirl.build :course, department: "CS", number: "777"
+    temp = FactoryGirl.build :course, department: "CS", number: "777", term: "1149", section: "002"
     temp.books << book
     temp.save
     $course = temp
   end
   let! (:bogus_book) { FactoryGirl.create :book }
   let! (:bogus_course) do
-    temp  = FactoryGirl.create :course, department: "AFM", number: "101"
+    temp  = FactoryGirl.create :course, department: "AFM", number: "101", term: "1151", section: "004"
     temp.books << bogus_book
     temp.save
     $bogus_course = temp
+  end
+
+  context "#where_course" do
+    it "correctly filters by term" do
+      Course.create(hash)
+      actual = CourseRepository.where_course(term: "1149")
+      expect(actual.length).to eq(2)
+    end
+
+    it "correctly filters by section" do
+      course_2 = Course.create(hash)
+      actual = CourseRepository.where_course(section: "005")
+      expect(actual.length).to eq(1)
+      expect(actual).to eq([course_2])
+    end
+
+    it "correctly applies multiple filters" do
+      course_2 = FactoryGirl.build :course, term: 1149, section: "003"
+      course_2.books << bogus_book
+      course_2.save
+      actual = CourseRepository.where_course(term: 1149, section: "003")
+      expect(actual.length).to eq(1)
+      expect(actual.first.books).to eq([bogus_book])
+      expect(actual).to eq([course_2])
+    end
+
+    it "has no false positives" do
+      actual = CourseRepository.where_course(section: "010")
+      expect(actual.length).to eq(0)
+    end
   end
 
   it "finds all books for a given course; department is case insensitive" do

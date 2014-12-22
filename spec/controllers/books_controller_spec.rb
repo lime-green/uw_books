@@ -20,6 +20,30 @@ describe Api::V1::BooksController, :type => :controller do
       expect(parse_json(response.body)["books"].to_json).to have_json_size(10)
     end
 
+    it "filters by term" do
+      book = FactoryGirl.create :book
+      bogus_course = FactoryGirl.create :course, term: "1149"
+      bogus_course.books << book
+      bogus_course.save
+      course = FactoryGirl.create :course, term: "1151"
+      course.books << book
+      course.save
+      get :index, format: :json, term: "1151"
+      expect(parse_json(response.body)["books"].first["courses"].to_json).to have_json_size(1)
+    end
+
+    it "does not filter by section" do
+      book = FactoryGirl.create :book
+      bogus_course = FactoryGirl.create :course, section: "003"
+      bogus_course.books << book
+      bogus_course.save
+      course = FactoryGirl.create :course, section: "004"
+      course.books << book
+      course.save
+      get :index, format: :json, section: "003"
+      expect(parse_json(response.body)["books"].first["courses"].to_json).to have_json_size(2)
+    end
+
     it "returns correct JSON (with newlines)" do
       book = FactoryGirl.create :book, :with_single_course
       course = book.courses.first
@@ -84,6 +108,46 @@ describe Api::V1::BooksController, :type => :controller do
 
       get :show, format: :json, department: "CS", number: "241"
       expect(parse_json(response.body)["books"].to_json).to have_json_size(6)
+    end
+
+    it "filters by term" do
+      book = FactoryGirl.create :book
+      bogus_course = FactoryGirl.create :course, department: "CS", number: "135", term: "1149"
+      bogus_course.books << book
+      bogus_course.save
+      course = FactoryGirl.create :course, department: "CS", number: "135", term: "1151"
+      course.books << book
+      course.save
+      get :show, format: :json, department: "CS", number: 135, term: "1151"
+      expect(parse_json(response.body)["books"].first["courses"].to_json).to have_json_size(1)
+    end
+
+    it "filters by section" do
+      book = FactoryGirl.create :book
+      bogus_course = FactoryGirl.create :course, department: "CS", number: "135", section: "001"
+      bogus_course.books << book
+      bogus_course.save
+      course = FactoryGirl.create :course, department: "CS", number: "135", section: "003"
+      course.books << book
+      course.save
+      get :show, format: :json, department: "CS", number: 135, section: "003"
+      expect(parse_json(response.body)["books"].first["courses"].to_json).to have_json_size(1)
+    end
+
+    it "filters by section and term" do
+      book = FactoryGirl.create :book
+      bogus_course = FactoryGirl.create :course, department: "CS", number: "135", section: "001", term: "1149"
+      bogus_course.books << book
+      bogus_course.save
+      course = FactoryGirl.create :course, department: "CS", number: "135", section: "003", term: "1151"
+      course.books << book
+      course.save
+      get :show, format: :json, department: "CS", number: 135, term: "1151", section: "001"
+      expect(parse_json(response.body)["books"].to_json).to have_json_size(0)
+      get :show, format: :json, department: "CS", number: 135, term: "1149", section: "003"
+      expect(parse_json(response.body)["books"].to_json).to have_json_size(0)
+      get :show, format: :json, department: "CS", number: 135, term: "1149", section: "001"
+      expect(parse_json(response.body)["books"].first["courses"].to_json).to have_json_size(1)
     end
 
     it "returns correct JSON (with newlines)" do
