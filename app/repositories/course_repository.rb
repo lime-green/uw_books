@@ -27,4 +27,8 @@ class CourseRepository < Repository
   def self.model
     Course
   end
+
+  def self.identified_by
+    required
+  end
 end
