@@ -82,7 +82,17 @@ describe MultiRepository do
       expect(book.courses).to eq([ course ])
     end
 
-    it "does not add the same book to a Course's books collection twice" do
+    it "treats a book with same sku as a duplicate" do
+      book = Book.create book_hash
+      course = Course.create course_hash
+      course.books << book; course.save
+      ic_book = Book.count
+      ic_course = Course.count
+      expect { MultiRepository.new_record hash.merge title: "some_other_title" }.not_to raise_error
+      expect(Book.count).to eq(ic_book)
+      expect(course.books.count).to eq(ic_book)
+      expect(Course.count).to eq(ic_book)
+      expect(book.courses.count).to eq(ic_course)
     end
   end
 end
