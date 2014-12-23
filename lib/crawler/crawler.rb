@@ -5,7 +5,6 @@ require 'net/http'
 
 class Crawler
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
-  CURRENT_TERM = "1151" # calculate this?
 
   PAGE_CONNECTION_ATTEMPT_MAX = 5
 
@@ -14,8 +13,9 @@ class Crawler
   SLICE_MAX = 5         # crawl this amount of links asynchronously
   RETRY_DELAY = 10      # sleep for this amount of seconds after a failed request
 
-  def initialize
+  def initialize(term)
     @agent = Mechanize.new
+    @current_term = term # calculate this?
   end
 
   def get_books
@@ -86,7 +86,7 @@ class Crawler
   def submit_form(root_page)
     target_form = root_page.at('div#search_box_course form') # Nokogiri object
     target_form = Mechanize::Form.new( target_form )          # Convert back to Mechanize object
-    target_form.field_with(value: /[0-9]{4}/).option_with(value: CURRENT_TERM).click # Select the term
+    target_form.field_with(value: /[0-9]{4}/).option_with(value: @current_term).click # Select the term
     @agent.submit(target_form) # first page of results
   end
 
