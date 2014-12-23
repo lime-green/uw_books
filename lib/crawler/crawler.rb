@@ -5,7 +5,7 @@ require 'net/http'
 
 class Crawler
   ROOT_URL = "https://fortuna.uwaterloo.ca/cgi-bin/cgiwrap/rsic/book"
-  CURRENT_TERM = "1149" # calculate this?
+  CURRENT_TERM = "1151" # calculate this?
 
   PAGE_CONNECTION_ATTEMPT_MAX = 5
 
