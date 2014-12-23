@@ -8,7 +8,7 @@ class CourseRepository < Repository
     hash = {}
     options.each do |k, v|
       v.upcase! if k == "department"
-      hash.merge! "courses.#{k}" => v
+      hash.merge! "#{k}" => v
     end
 
     Course.where( hash )
