@@ -10,7 +10,12 @@ class Repository
 
   def self.new_record(hash)
     raise "Missing key in hash: #{hash}. Need: #{required}" unless param_require(hash)
-    model.find_by(hash.slice *identified_by) || model.create!(hash)
+    if record = model.find_by(hash.slice *identified_by)
+      record.update_attributes hash
+      record
+    else
+      model.create!(hash)
+    end
   end
 
   protected

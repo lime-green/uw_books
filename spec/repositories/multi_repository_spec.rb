@@ -58,13 +58,15 @@ describe MultiRepository do
       expect(course.books).to eq(Book.where(book_hash))
     end
 
-    it "creates a course but not a book if book already exists" do
+    it "creates a course and updates a book if book already exists" do
       book = Book.create book_hash
       ic_book = Book.count
       ic_course = Course.count
-      MultiRepository.new_record hash
+      MultiRepository.new_record hash.merge stock: 4, price: 8.99
 
-      expect(Course.count).to eq(ic_course + 1)
+      expect(Course.count).to eq(1)
+      expect(Book.first[:price]).to eq(8.99)
+      expect(Book.first[:stock]).to eq(4)
       expect(Book.count).to eq(ic_book)
       expect(book.courses).to eq(Course.where(course_hash))
     end
