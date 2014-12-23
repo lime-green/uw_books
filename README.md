@@ -1,7 +1,6 @@
-### UW Books
-----
+# UW Books
 
-#### Overview
+## Overview
 Base URL: `uw-books.herokuapp.com/api/v1`
 
 There are currently 4 endpoints:
@@ -10,19 +9,18 @@ There are currently 4 endpoints:
 * `/books/:department/:number`
 * `/courses/:department/:number`
 
-#### Usage
-
+## Usage
 Some simple usage examples are shown below.
 
 **Notes**:
 
-`reqopt` describes whether the specified book is required.
+* `reqopt` describes whether the specified book is required.
 
-`sku` is BookLook’s internal stock-keeping unit.
+* `sku` is BookLook’s internal stock-keeping unit.
 It is equivalent to a book’s ISBN, except for special non-books such as “NO TEXT” and Media-Doc course texts.
 In these cases, the `sku` contains an alphabet character, so it is easy to distinguish real books from non-published ones.
 
-##### /books/:department/:number
+### /books/:department/:number
 ----
 Optional parameters: `term`, `section`, `page`
 
@@ -96,7 +94,7 @@ Example output:
 }
 ```
 
-##### /courses/:department/:number
+### /courses/:department/:number
 ----
 Optional parameters: `term`, `section`, `page`
 
@@ -152,7 +150,7 @@ Example output:
 }
 ```
 
-##### /books
+### /books
 ----
 Optional parameters: `term`, `page`
 
@@ -215,7 +213,7 @@ Example output:
 ...
 ```
 
-##### /courses
+### /courses
 ----
 Optional parameters: `term`, `page`
 
