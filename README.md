@@ -12,10 +12,19 @@ There are currently 4 endpoints:
 
 #### Usage
 
+Some simple usage examples are shown below.
+
+**Notes**:
+
+`reqopt` describes whether the specified book is required.
+
+`sku` is BookLook’s internal stock-keeping unit.
+It is equivalent to a book’s ISBN, except for special non-books such as “NO TEXT” and Media-Doc course texts.
+In these cases, the `sku` contains an alphabet character, so it is easy to distinguish real books from non-published ones.
 
 ##### /books/:department/:number
 ----
-Optional parameters: term, section, page
+Optional parameters: `term`, `section`, `page`
 
 Example queries:
 * `uw-books.herokuapp.com/api/v1/books/econ/202`
@@ -89,7 +98,7 @@ Example output:
 
 ##### /courses/:department/:number
 ----
-Optional parameters: term, section, page
+Optional parameters: `term`, `section`, `page`
 
 Example queries:
 * `uw-books.herokuapp.com/api/v1/courses/econ/202`
@@ -145,7 +154,7 @@ Example output:
 
 ##### /books
 ----
-Optional parameters: term, page
+Optional parameters: `term`, `page`
 
 Example queries:
 * `uw-books.herokuapp.com/api/v1/books`
@@ -208,7 +217,7 @@ Example output:
 
 ##### /courses
 ----
-Optional parameter: term
+Optional parameters: `term`, `page`
 
 Example queries:
 * `uw-books.herokuapp.com/api/v1/courses`
