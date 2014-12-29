@@ -1,7 +1,7 @@
 # UW Books
 
 ## Overview
-Base URL: `uw-books.herokuapp.com/api/v1`
+Base URL: `uw-books.jtdm.ca/api/v1`
 
 There are currently 4 endpoints:
 * `/books`
@@ -25,8 +25,8 @@ In these cases, the `sku` contains an alphabet character, so it is easy to disti
 Optional parameters: `term`, `section`, `page`
 
 Example queries:
-* `uw-books.herokuapp.com/api/v1/books/econ/202`
-* `uw-books.herokuapp.com/api/v1/books/econ/202?term=1149&section=001`
+* `uw-books.jtdm.ca/api/v1/books/econ/202`
+* `uw-books.jtdm.ca/api/v1/books/econ/202?term=1149&section=001`
 
 Example output:
 ```
@@ -99,8 +99,8 @@ Example output:
 Optional parameters: `term`, `section`, `page`
 
 Example queries:
-* `uw-books.herokuapp.com/api/v1/courses/econ/202`
-* `uw-books.herokuapp.com/api/v1/courses/econ/202?term=1149&section=001`
+* `uw-books.jtdm.ca/api/v1/courses/econ/202`
+* `uw-books.jtdm.ca/api/v1/courses/econ/202?term=1149&section=001`
 
 Example output:
 ```
@@ -155,8 +155,8 @@ Example output:
 Optional parameters: `term`, `page`
 
 Example queries:
-* `uw-books.herokuapp.com/api/v1/books`
-* `uw-books.herokuapp.com/api/v1/books?term=1149&page=1`
+* `uw-books.jtdm.ca/api/v1/books`
+* `uw-books.jtdm.ca/api/v1/books?term=1149&page=1`
 
 Example output:
 ```
@@ -218,8 +218,8 @@ Example output:
 Optional parameters: `term`, `page`
 
 Example queries:
-* `uw-books.herokuapp.com/api/v1/courses`
-* `uw-books.herokuapp.com/api/v1/courses?term=1149&page=1`
+* `uw-books.jtdm.ca/api/v1/courses`
+* `uw-books.jtdm.ca/api/v1/courses?term=1149&page=1`
 
 Example output:
 ```
